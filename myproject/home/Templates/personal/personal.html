@@ -1,0 +1,221 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'personal/style.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <!-- Profile Box -->
+    <div class="profile-box fade-in-up" style="animation-delay: 0.1s">
+        <div class="profile-header">
+            <div class="avatar">
+                {% if profile_user.avatar %}
+                    <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.full_name }}">
+                {% else %}
+                    {{ profile_user.full_name|slice:":2" }}
+                {% endif %}
+            </div>
+
+            <div class="profile-info">
+                <h1>{{ profile_user.full_name }}</h1>
+                <div class="bio">
+                    {{ profile_user.bio }}
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-number">{{ profile_user.get_friends_count }}</span>
+                <span class="stat-label">Bạn bè</span>
+            </div>
+        </div>
+
+        <div class="buttons">
+            {% if current_user == profile_user %}
+                <button class="btn btn-primary" onclick="openEditProfileModal()">
+                    ✏️ Chỉnh sửa
+                </button>
+            {% else %}
+
+            {% if friendship_status == None %}
+            <!-- Chưa gửi lời mời -->
+            <form method="post" action="{% url 'add_friend' profile_user.id %}">
+                {% csrf_token %}
+                <button class="btn btn-secondary">➕ Thêm bạn bè</button>
+            </form>
+        
+
+            {% elif friendship_status == 'pending' %}
+                {% if friendship_sender_id == current_user.id %}
+                <!-- Người này là người gửi -->
+                <form method="post" action="{% url 'cancel_request' profile_user.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-warning">❌ Hủy lời mời</button>
+                </form>
+                {% else %}
+                <!-- Người này là người nhận -->
+                <form method="post" action="{% url 'accept_request' profile_user.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-success">✅ Đồng ý</button>
+                </form>
+                <form method="post" action="{% url 'cancel_request' profile_user.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-danger">❌ Từ chối</button>
+                </form>
+            {% endif %}
+
+            {% elif friendship_status == 'accepted' %}
+            <!-- Đã là bạn bè -->
+            <form method="post" action="{% url 'delete_friend' profile_user.id %}">
+                {% csrf_token %}
+                <button class="btn btn-danger">❌ Hủy kết bạn</button>
+            </form>
+            {% endif %}
+
+            <button class="btn btn-secondary" onclick="sendFriendRequest()">
+                💬 Nhắn tin
+            </button>   
+            {% endif %}
+        </div>
+    </div>
+
+
+
+    <!-- Content Section -->
+    <div class="content-section fade-in-up" style="animation-delay: 0.2s">
+        <!-- Post Composer -->
+        {% if current_user == profile_user %}
+        <div class="post-composer">
+            <form id="postForm" method="post" enctype="multipart/form-data" action="{% url 'create_post' %}">
+                {% csrf_token %}
+                <div class="composer-header">
+                    <div class="post-avatar">
+                        {% if current_user.avatar %}
+                            <img src="{{ current_user.avatar.url }}" alt="{{ current_user.full_name }}">
+                        {% else %}
+                            {{ current_user.full_name|slice:":2" }}
+                        {% endif %}
+                    </div>
+                    <span style="color: #666; font-size: 1.1rem;">Bạn đang nghĩ gì?</span>
+                </div>
+                <textarea placeholder="Chia sẻ suy nghĩ của bạn..." id="postContent" name="content"></textarea>
+                <div class="post-actions">
+                    <div class="post-icons">
+                        <label for="image-upload" class="custom-file-upload">
+                            📷 Chọn ảnh 
+                        </label>
+                        <input id="image-upload" type="file" name="media" accept="image/*">
+                    </div>
+                    <button class="btn btn-primary">Đăng bài</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Posts Container -->
+        <div class="posts-container" id="posts-container">
+            {% for post in posts %}
+            <div class="post">
+                <div class="post-header">
+                    <div class="post-avatar">
+                        {% if post.user.avatar %}
+                            <img src="{{ post.user.avatar.url }}" alt="{{ post.user.full_name }}">
+                        {% else %}
+                            {{ post.user.full_name|slice:":2" }}
+                        {% endif %}
+                    </div>
+                    <div class="post-meta">
+                        <div class="post-author">{{ post.user.full_name }}</div>
+                        <div class="post-time">{{ post.created_at|timesince }} ago</div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    {{ post.content }}
+                </div>
+                {% if post.media %}
+                <div class="post-media">
+                    <img src="{{ post.media.url }}" alt="Ảnh bài viết">
+                </div>
+                {% endif %}
+                <div class="post-reactions">
+                    <button class="reaction-btn" onclick="likePost(this, {{ post.id }})">
+                        <span>❤️</span>
+                        <span class="count">{{ post.likeCount }}</span>
+                    </button>
+                    <button class="reaction-btn" onclick="commentPost(this)">
+                        <span>💬</span>
+                        <span class="count">{{ post.commentCount }}</span>
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <p>Chưa có bài viết nào.</p>
+            {% endfor %}
+        </div>
+        
+    </div>
+</div>
+
+
+<div id="friendsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Danh sách bạn bè</h2>
+            <span class="close" onclick="closeFriendsModal()">&times;</span>
+        </div>
+        <div class="friends-list" id="friendsList">
+            {% for friend in friends %}
+            <a href="{% url 'personal_with_id' friend.id %}" class="friend-item" style="text-decoration:none">
+                <div class="post-avatar">
+                    {% if friend.avatar %}
+                    <img src="{{ friend.avatar }}" alt="{{ friend.name }}">
+                    {% else %}
+                    {{ friend.name|slice:":2" }}
+                    {% endif %}
+                </div>
+                <div class="friend-info">
+                    <div class="friend-name">{{ friend.name }}</div>
+                </div>
+            </a>
+            {% empty %}
+            <p>Không có bạn bè nào</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal chỉnh sửa profile -->
+<div id="editProfileModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Chỉnh sửa thông tin cá nhân</h2>
+            <span class="close" onclick="closeEditProfileModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="editProfileForm" method="post" enctype="multipart/form-data" action="{% url 'edit_profile' %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditProfileModal()">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'personal/script.js' %}" defer></script>
+{% endblock %}

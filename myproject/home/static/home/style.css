@@ -1,0 +1,278 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+
+
+
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 100px 2rem 2rem;
+}
+
+
+
+.main-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.create-post {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.post-input {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.post-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.post-textarea {
+    flex-grow: 1;
+    border: none;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 1rem;
+    resize: none;
+    min-height: 80px;
+}
+
+.post-textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.post-options {
+    display: flex;
+    gap: 1rem;
+}
+
+.post-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #666;
+}
+
+.post-option:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.post-btn {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.post-btn:hover {
+    transform: scale(1.05);
+}
+
+.post {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.post:hover {
+    transform: translateY(-5px);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.post-user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.post-user-info h4 {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+}
+
+.post-time {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.post-content {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.post-image {
+    width: 100%;
+    border-radius: 12px;
+    margin: 1rem 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.post-engagement {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap:180px;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.engagement-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #666;
+    border: none;
+    background: none;
+}
+
+.engagement-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.engagement-btn.active {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+
+
+@media (max-width: 768px) {
+    .container {
+        padding: 100px 1rem 2rem;
+        max-width: 600px;
+    }
+    
+    .nav-content {
+        padding: 0 1rem;
+    }
+    
+    .search-box {
+        margin: 0 1rem;
+    }
+
+    .navbar {
+        padding: 1rem;
+    }
+
+    .post-engagement {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .engagement-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ẩn input gốc */
+input[type="file"] {
+    display: none;
+}
+
+/* Nút upload tùy chỉnh */
+.custom-file-upload {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #f0f2f5;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: 0.3s ease;
+}
+
+/* Hiệu ứng hover */
+.custom-file-upload:hover {
+    background-color: #e4e6eb;
+    border-color: #999;
+}
+
+
+
+

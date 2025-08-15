@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>SocialHub - Kết nối mọi lúc</title>
+    <link rel="stylesheet" href="{% static 'base/style.css' %}">
+    <script src="{% static 'base/script.js' %}" defer></script>
+
+    {% block extra_css %}
+    <!-- CSS riêng của từng trang sẽ chèn vào đây -->
+    {% endblock %}
+</head>
+<body>
+
+    <!-- Navbar chung -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">SocialHub</div>
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="Tìm kiếm bạn bè">
+            </div>
+            <div class="nav-icons">
+                <a href="{% url 'home' %}" class="nav-icon" title="Trang chủ" style="text-decoration:none">🏠</a>
+                <a href="{% url 'home' %}" class="nav-icon" title="Tin nhắn" style="text-decoration:none">💬</a>
+
+                <div class="nav-icon has-dropdown" title="Thông báo">
+                    🔔
+                    <span class="notification-badge">3</span>
+                    <div class="dropdown">
+                        <div class="dropdown-item">💖 Lan Hương đã thích bài viết của bạn</div>
+                        <div class="dropdown-item">💬 Trung Quân đã bình luận: "Quá hay!"</div>
+                        <div class="dropdown-item">👥 An Thư đã theo dõi bạn</div>
+                    </div>
+                </div>  
+
+                
+
+                
+
+
+
+
+                <div class="nav-icon has-dropdown" title="Tài khoản">👤
+                    <div class="dropdown">
+                        <a href="{% url 'personal' %}">Trang cá nhân</a>
+                        <a href="{% url 'logout' %}" style="color:red">Đăng xuất</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Nội dung từng trang -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    
+    {% block extra_js %}
+    <!-- JS riêng của từng trang sẽ chèn vào đây -->
+    {% endblock %}
+</body>
+</html>

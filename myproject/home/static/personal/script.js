@@ -1,0 +1,204 @@
+const postForm = document.getElementById('postForm');
+
+if (postForm) {
+    postForm.addEventListener('submit', function(e) {
+        const content = document.getElementById('postContent').value.trim();
+        const image = document.getElementById('image-upload').files.length;
+
+        if (!content && image === 0) {
+            e.preventDefault(); // Chặn gửi form
+            alert('Vui lòng nhập nội dung hoặc chọn ảnh trước khi đăng!');
+            return;
+        }
+    });
+}
+
+
+
+// Like post functionality
+function getCSRFToken() {
+    return document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1];
+}
+  
+function likePost(button, postId) {
+    const countSpan = button.querySelector('.count');
+    let count = parseInt(countSpan.textContent);
+    const wasLiked = button.classList.contains('liked');
+  
+    // 1) UI phản ứng ngay (optimistic UI)
+    if (wasLiked) {
+      button.classList.remove('liked');
+      count--;
+      button.style.transform = 'scale(0.9)';
+    } else {
+      button.classList.add('liked');
+      count++;
+      button.style.transform = 'scale(1.2)';
+    }
+    setTimeout(() => { button.style.transform = 'scale(1)'; }, 200);
+    countSpan.textContent = count;
+  
+  }
+
+
+// Comment functionality
+function commentPost(button) {
+    const post = button.closest('.post');
+    const author = post.querySelector('.post-author').textContent;
+    alert(`Tính năng bình luận cho bài viết của ${author} sẽ được phát triển trong phiên bản tiếp theo!`);
+}
+
+
+
+// Navigation
+function showTab(tab) {
+    alert(`Chuyển đến tab: ${tab}`);
+}
+
+// Initialize animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Floating animation for avatar
+    const avatar = document.querySelector('.avatar');
+    setInterval(() => {
+        if (!avatar.matches(':hover')) {
+            avatar.style.transform = 'translateY(-5px)';
+            setTimeout(() => {
+                avatar.style.transform = 'translateY(0)';
+            }, 1000);
+        }
+    }, 4000);
+
+    // Auto-focus on post composer when clicked
+    const textarea = document.getElementById('postContent');
+    const composer = document.querySelector('.post-composer');
+    
+    composer.addEventListener('click', () => {
+        textarea.focus();
+    });
+
+    // Auto-resize textarea
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.max(100, this.scrollHeight) + 'px';
+    });
+});
+
+
+
+
+
+
+
+document.querySelector('.stats').addEventListener('click', function() {
+    document.getElementById('friendsModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+});
+
+// Đóng modal khi bấm nút close
+function closeFriendsModal() {
+    document.getElementById('friendsModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+// Sample friends data
+const friendsData = [
+    { name: "Trần Minh Hoàng", initials: "TMH", status: "online" },
+    { name: "Lê Thị Mai", initials: "LTM", status: "online" },
+    { name: "Phạm Văn Đức", initials: "PVĐ", status: "offline" },
+    { name: "Nguyễn Thị Lan", initials: "NTL", status: "online" },
+    { name: "Hoàng Minh Tuấn", initials: "HMT", status: "offline" },
+    { name: "Vũ Thị Hương", initials: "VTH", status: "online" },
+    { name: "Đỗ Văn Nam", initials: "ĐVN", status: "offline" },
+    { name: "Bùi Thị Thảo", initials: "BTT", status: "online" },
+    { name: "Lý Văn Hùng", initials: "LVH", status: "offline" },
+    { name: "Chu Thị Nga", initials: "CTN", status: "online" }
+];
+
+
+
+
+function showFriendsList() {
+    const modal = document.getElementById('friendsModal');
+    const friendsList = document.getElementById('friendsList');
+    
+    // Clear existing content
+    friendsList.innerHTML = '';
+    
+    // Populate friends list
+    friendsData.forEach(friend => {
+        const friendItem = document.createElement('div');
+        friendItem.className = 'friend-item';
+        friendItem.innerHTML = `
+            <div class="friend-avatar">${friend.initials}</div>
+            <div class="friend-info">
+                <div class="friend-name">${friend.name}</div>
+                <div class="friend-status ${friend.status}">
+                    ${friend.status === 'online' ? '🟢 Đang hoạt động' : '⚫ Không hoạt động'}
+                </div>
+            </div>
+        `;
+        
+        friendItem.addEventListener('click', () => {
+            alert(`Nhấn vào ${friend.name}`);
+        });
+        
+        friendsList.appendChild(friendItem);
+    });
+    
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden'; // Prevent background scroll
+}
+
+function closeFriendsModal() {
+    const modal = document.getElementById('friendsModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Restore scroll
+}
+
+// Close modal when clicking outside of it
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('friendsModal');
+    if (event.target === modal) {
+        closeFriendsModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeFriendsModal();
+    }
+});
+
+// Animation khi trang load
+window.addEventListener('load', function() {
+    const profileBox = document.querySelector('.profile-box');
+    profileBox.style.animationDelay = '0.2s';
+});
+
+
+
+
+function openEditProfileModal() {
+    document.getElementById('editProfileModal').style.display = 'block';
+    document.body.style.overflow = 'hidden'; // khóa scroll nền nếu muốn
+}
+
+function closeEditProfileModal() {
+    document.getElementById('editProfileModal').style.display = 'none';
+    document.body.style.overflow = 'auto'; // mở scroll nền lại
+}
+
+// Đóng modal khi click ra ngoài modal-content
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('editProfileModal');
+    if (event.target === modal) {
+        closeEditProfileModal();
+    }
+});
+
+// Đóng modal khi nhấn ESC
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeEditProfileModal();
+    }
+});
