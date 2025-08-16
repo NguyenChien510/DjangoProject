@@ -16,29 +16,62 @@ if (postForm) {
 
 
 // Like post functionality
-function getCSRFToken() {
-    return document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1];
-}
-  
 function likePost(button, postId) {
     const countSpan = button.querySelector('.count');
     let count = parseInt(countSpan.textContent);
     const wasLiked = button.classList.contains('liked');
-  
+
     // 1) UI phản ứng ngay (optimistic UI)
     if (wasLiked) {
-      button.classList.remove('liked');
-      count--;
-      button.style.transform = 'scale(0.9)';
+        button.classList.remove('liked');
+        count--;
+        button.style.transform = 'scale(0.9)';
     } else {
-      button.classList.add('liked');
-      count++;
-      button.style.transform = 'scale(1.2)';
+        button.classList.add('liked');
+        count++;
+        button.style.transform = 'scale(1.2)';
     }
     setTimeout(() => { button.style.transform = 'scale(1)'; }, 200);
     countSpan.textContent = count;
-  
-  }
+
+    // 2) Gọi API Django để xử lý Like & gửi notification
+    fetch(`/like/${postId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "liked") {
+            button.classList.add('liked');
+        } else if (data.status === "unliked") {
+            button.classList.remove('liked');
+        }
+        // Cập nhật số like từ server
+        button.querySelector('.count').textContent = data.likeCount;
+    })
+    .catch(err => console.error("Fetch error:", err));
+}
+
+// Hàm lấy CSRF token (nếu đang dùng Django)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 
 
 // Comment functionality
@@ -72,15 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const textarea = document.getElementById('postContent');
     const composer = document.querySelector('.post-composer');
     
-    composer.addEventListener('click', () => {
-        textarea.focus();
-    });
 
-    // Auto-resize textarea
-    textarea.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = Math.max(100, this.scrollHeight) + 'px';
-    });
 });
 
 

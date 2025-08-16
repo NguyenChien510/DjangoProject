@@ -117,10 +117,31 @@
         </div>
         {% endif %}
 
+
+
+        <style>
+            .post.highlight {
+                border: 2px solid gray;
+            }
+            </style>
+            
+            <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const highlight = "{{ highlight_post_id }}";
+                if (highlight) {
+                    const el = document.getElementById("post-" + highlight);
+                    if (el) {
+                        el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }
+            });
+            </script>
+
+
         <!-- Posts Container -->
         <div class="posts-container" id="posts-container">
             {% for post in posts %}
-            <div class="post">
+            <div class="post {% if post.id|stringformat:'s' == highlight_post_id %}highlight{% endif %}" id="post-{{ post.id }}"">
                 <div class="post-header">
                     <div class="post-avatar">
                         {% if post.user.avatar %}
@@ -143,7 +164,8 @@
                 </div>
                 {% endif %}
                 <div class="post-reactions">
-                    <button class="reaction-btn" onclick="likePost(this, {{ post.id }})">
+                    <button class="reaction-btn {% if post.id in user_liked_posts %}liked{% endif %}"
+                            onclick="likePost(this, {{ post.id }})">
                         <span>❤️</span>
                         <span class="count">{{ post.likeCount }}</span>
                     </button>
@@ -152,6 +174,7 @@
                         <span class="count">{{ post.commentCount }}</span>
                     </button>
                 </div>
+                
             </div>
             {% empty %}
             <p>Chưa có bài viết nào.</p>
@@ -219,3 +242,4 @@
 {% block extra_js %}
 <script src="{% static 'personal/script.js' %}" defer></script>
 {% endblock %}
+

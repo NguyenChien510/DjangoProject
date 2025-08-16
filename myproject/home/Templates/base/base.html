@@ -23,19 +23,81 @@
             <div class="nav-icons">
                 <a href="{% url 'home' %}" class="nav-icon" title="Trang chủ" style="text-decoration:none">🏠</a>
                 <a href="{% url 'home' %}" class="nav-icon" title="Tin nhắn" style="text-decoration:none">💬</a>
-
+                
+                {% comment %} <div class="nav-icon has-dropdown" title="Thông báo">
+                    🔔
+                    <span id="notification-count" class="notification-badge">0</span>
+                    <div id="notification-list" class="dropdown"></div>
+                </div> {% endcomment %}
                 <div class="nav-icon has-dropdown" title="Thông báo">
                     🔔
-                    <span class="notification-badge">3</span>
-                    <div class="dropdown">
-                        <div class="dropdown-item">💖 Lan Hương đã thích bài viết của bạn</div>
-                        <div class="dropdown-item">💬 Trung Quân đã bình luận: "Quá hay!"</div>
-                        <div class="dropdown-item">👥 An Thư đã theo dõi bạn</div>
+                    <span id="notification-count" class="notification-badge">{{ unread_count }}</span>
+                    <div id="notification-list" class="dropdown">
+                        {% for notification in notifications %}
+                            <div class="dropdown-item {% if not notification.is_read %}unread{% endif %}" data-id="{{ notification.id }}">
+                                {% if notification.post %}
+                                    <a href="{% url 'personal' %}?highlight={{ notification.post.id }}">{{ notification.message }}</a>
+                                {% else %}
+                                    📢 {{ notification.message }}
+                                {% endif %}
+                            </div>
+                        {% empty %}
+                            <div class="dropdown-item" style="padding:0.5rem 0.8rem">Không có thông báo nào</div>
+                        {% endfor %}
                     </div>
-                </div>  
+                </div>
+                
+                <style>
+                    /* CSS cho thông báo chưa đọc */
+                    .dropdown-item.unread {
+                    font-weight: bold;      /* chữ đậm */
+                    background-color: #f0f8ff; /* nền nhạt để nổi bật */
+                    }   
+                </style>
 
+                <script>
+                    const socket = new WebSocket(
+                        `ws://${window.location.host}/ws/notifications/`
+                    );
+                
+                    socket.onmessage = function(e) {
+                        const data = JSON.parse(e.data);
+                        document.getElementById('notification-count').innerText = data.count;
+                
+                        const list = document.getElementById('notification-list');
+                        const item = document.createElement('div');
+                        item.classList.add('dropdown-item');
+                        item.textContent = data.message;
+                        list.prepend(item); // Thêm lên đầu
+                    };
+                </script>
                 
 
+                
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('#notification-list a').forEach(link => {
+            link.addEventListener('click', function(e){
+                e.preventDefault();
+                const notificationDiv = this.closest('.dropdown-item');
+                const notificationId = notificationDiv.dataset.id;
+                const href = this.href;
+    
+                fetch("{% url 'mark_notification_read' %}?id=" + notificationId)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'ok') {
+                        notificationDiv.classList.remove('unread');
+                        let countSpan = document.getElementById('notification-count');
+                        let count = parseInt(countSpan.innerText);
+                        countSpan.innerText = Math.max(0, count - 1);
+                    }
+                    window.location.href = href;
+                });
+            });
+        });
+    });
+</script>
                 
 
 

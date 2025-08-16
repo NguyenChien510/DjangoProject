@@ -130,7 +130,7 @@ body {
 
 .dropdown-item, 
 .dropdown a {
-    padding: 0.8rem 1rem;
+    padding: 5px;
     text-decoration: none;
     color: #333;
     font-size: 0.9rem;
@@ -138,8 +138,21 @@ body {
     display: block;
 }
 
-.dropdown-item:hover, 
-.dropdown a:hover {
+/* Chọn dropdown của nav-icon có class has-dropdown và title="Tài khoản" */
+.nav-icon.has-dropdown[title="Tài khoản"] .dropdown a {
+    display: block;
+    padding: 0.5rem 0.8rem;
+    text-decoration: none;
+    color: #333;
+    transition: background 0.3s, color 0.3s; /* hover mượt */
+}
+
+.nav-icon.has-dropdown[title="Tài khoản"] .dropdown a:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.dropdown-item:hover{
     background: rgba(102, 126, 234, 0.1);
     color: #667eea;
 }

@@ -1,11 +1,17 @@
 from django import forms
 from django.db import models
 from pymysql import IntegrityError
+from django.contrib.auth.models import AbstractUser
 
-class User(models.Model):
+class User(AbstractUser):
+    # Bỏ username, dùng email làm đăng nhập
+    username = None  # bỏ field username mặc định
+    email = models.EmailField(unique=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []  # Không cần thêm trường bắt buộc nào ngoài email
+    
     full_name = models.CharField(max_length=100)              # Họ tên
-    email = models.EmailField(unique=True)                    # Email duy nhất
-    password = models.CharField(max_length=255)               # Mật khẩu (nếu tự quản lý, cần hash)
     bio = models.TextField(blank=True, null=True)              # Giới thiệu
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)  # Ảnh đại diện
     date_of_birth = models.DateField(blank=True, null=True)    # Ngày sinh
