@@ -1,4 +1,6 @@
 from imaplib import _Authenticator
+import random
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 
@@ -49,7 +51,22 @@ def login(request):
 
 @login_required(login_url='login')
 def home(request):
-    return render(request,'home/home.html',{'user':request.user})
+    posts = list(Posts.objects.all())
+    random.shuffle(posts)
+    posts = posts[:100]
+    
+    liked_posts = set(
+        PostLike.objects.filter(user=request.user)
+                        .values_list('post_id', flat=True)
+    )
+    
+    context = {
+        'user' : request.user,
+        'posts': posts,
+        'user_liked_posts':liked_posts,
+    }
+    
+    return render(request,'home/home.html',context)
 
 @login_required(login_url='login')
 def create_post(request):
@@ -196,4 +213,23 @@ def friends_list_view(request):
         })
 
     return render(request, 'friends_modal.html', {'friends': friends})
+
+
+
+@login_required(login_url='login')
+def delete_post(request, post_id):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Phương thức không hợp lệ'})
+
+    try:
+        post = Posts.objects.get(id=post_id)
+    except Posts.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Bài viết không tồn tại'})
+
+    # Chỉ cho user chủ bài xóa
+    if post.user != request.user:
+        return JsonResponse({'status': 'error', 'message': 'Bạn không có quyền xóa bài viết này'})
+
+    post.delete()
+    return JsonResponse({'status': 'ok'})
 

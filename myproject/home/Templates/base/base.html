@@ -40,6 +40,7 @@
                                 {% else %}
                                     📢 {{ notification.message }}
                                 {% endif %}
+                                {% comment %} <p style="font-size:0.8rem;position:relative;left:125px;">{{notification.created_at|timesince}} ago</p> {% endcomment %}
                             </div>
                         {% empty %}
                             <div class="dropdown-item" style="padding:0.5rem 0.8rem">Không có thông báo nào</div>

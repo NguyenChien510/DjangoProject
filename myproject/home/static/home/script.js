@@ -1,27 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Hiệu ứng cho nút engagement
-    const engagementBtns = document.querySelectorAll('.engagement-btn');
-    engagementBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            this.classList.toggle('active');
-
-            // Nếu là nút like
-            if (this.textContent.includes('❤️')) {
-                const currentCount = parseInt(this.textContent.match(/\d+/));
-                const newCount = this.classList.contains('active') ?
-                    currentCount + 1 : currentCount - 1;
-
-                this.innerHTML = `❤️ ${newCount}`;
-
-                // Hiệu ứng tim scale
-                this.style.transform = this.classList.contains('active')
-                    ? 'scale(1.2)' : 'scale(0.9)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 200);
-            }
-        });
-    });
 
     // Hiệu ứng cho menu
     const menuItems = document.querySelectorAll('.menu-item');
@@ -82,3 +59,86 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+
+function likePost(button, postId) {
+    if (!button) return console.error("Button is null");
+
+    const countSpan = button.querySelector('.count');
+    if (!countSpan) return console.error("Cannot find .count inside button!");
+
+    let count = parseInt(countSpan.textContent) || 0;
+    const wasLiked = button.classList.contains('liked');
+
+    // Optimistic UI
+    if (wasLiked) {
+        button.classList.remove('liked');
+        count--;
+        button.style.transform = 'scale(0.9)';
+    } else {
+        button.classList.add('liked');
+        count++;
+        button.style.transform = 'scale(1.2)';
+    }
+    setTimeout(() => { button.style.transform = 'scale(1)'; }, 200);
+    countSpan.textContent = count;
+
+    fetch(`/like/${postId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Chỉ cập nhật số like từ server
+        if (data.likeCount !== undefined && countSpan) {
+            countSpan.textContent = data.likeCount;
+        }
+    })
+    .catch(err => console.error("Fetch error:", err));
+}
+
+
+// Hàm lấy CSRF token (nếu đang dùng Django)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function deletePost(postId) {
+    if (!confirm("Bạn có chắc muốn xóa bài viết này?")) return;
+
+    fetch(`/delete_post/${postId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            // Xóa element post khỏi DOM
+            const postEl = document.getElementById(`post-${postId}`);
+            if (postEl) postEl.remove();
+            location.reload();
+        } else {
+            alert('Xóa thất bại: ' + data.message);
+        }
+    })
+    .catch(err => console.error(err));
+}

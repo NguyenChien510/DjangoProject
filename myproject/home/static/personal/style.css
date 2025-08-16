@@ -16,12 +16,14 @@ body {
 }
 
 .container {
-    max-width: 650px;
+    max-width: 600px;
     margin: 0 auto;
     padding: 20px;
 }
 
-
+.delete-post-btn:hover{
+    color: red;
+}
 
 
 .profile-box {

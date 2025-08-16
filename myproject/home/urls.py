@@ -16,7 +16,7 @@ urlpatterns = [
     path('cancel_request/<int:user_id>/',views.cancel_request,name='cancel_request'),
     path('deletefriend/<int:user_id>/',views.delete_friend,name='delete_friend'),
     path('acceptrequest/<int:user_id>/',views.accpet_request,name = 'accept_request'),
-    
+    path('delete_post/<int:post_id>/',views.delete_post,name='delete_post'),
     path('like/<int:post_id>/',viewrealtime.like_post,name='like_post'),
     path('mark_notification_read/', viewrealtime.mark_notification_read, name='mark_notification_read'),
     

@@ -1,91 +1,92 @@
-{% extends 'base/base.html' %}
-{% load static %}
-
-
+{% extends 'base/base.html' %} 
+{% load static %} 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'home/style.css' %}">
-{% endblock %}
-
+<link rel="stylesheet" href="{% static 'home/style.css' %}" />
+{% endblock %} 
 
 {% block content %}
-    <div class="container">
-        <main class="main-feed">
-            <form method="post" enctype="multipart/form-data" action="{% url 'create_post' %}">
-            {% csrf_token %}
-            <div class="create-post">
-                <div class="post-input">
-                    <div class="post-avatar">M</div>
-                    <textarea name="content" class="post-textarea" placeholder="Bạn đang nghĩ gì?"></textarea>
-                </div>
-                <div class="post-actions">
-                    <div class="post-options">
-                        <label for="image-upload" class="custom-file-upload">
-                            📷 Chọn ảnh 
-                        </label>
-                        <input id="image-upload" type="file" name="media" accept="image/*">
-                    </div>
-                    <button type="submit" class="post-btn">Đăng bài</button>
-                </div>
-            </div>
-            </form>
+<div class="container">
+  <main class="main-feed">
+    <form
+      method="post"
+      enctype="multipart/form-data"
+      action="{% url 'create_post' %}"
+    >
+      {% csrf_token %}
+      <div class="create-post">
+        <div class="post-input">
+          <div class="post-avatar">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="{{ user.full_name }}" />
+            {% else %} {{ user.full_name|slice:":2" }} {% endif %}
+          </div>
+          <textarea
+            name="content"
+            class="post-textarea"
+            placeholder="Bạn đang nghĩ gì?"
+          ></textarea>
+        </div>
+        <div class="post-actions">
+          <div class="post-options">
+            <label for="image-upload" class="custom-file-upload">
+              📷 Chọn ảnh
+            </label>
+            <input
+              id="image-upload"
+              type="file"
+              name="media"
+              accept="image/*"
+            />
+          </div>
+          <button type="submit" class="post-btn">Đăng bài</button>
+        </div>
+      </div>
+    </form>
 
-            <article class="post">
-                <div class="post-header">
-                    <div class="post-user-avatar">LH</div>
-                    <div class="post-user-info">
-                        <h4>Lan Hương</h4>
-                        <div class="post-time">2 giờ trước</div>
-                    </div>
-                </div>
-                <div class="post-content">
-                    Hôm nay thật là một ngày tuyệt vời! Vừa hoàn thành dự án mới và cảm thấy rất hài lòng với kết quả. Cảm ơn team đã hỗ trợ tôi nhiệt tình! 🎉
-                </div>
-                <div class="post-image">📸 Hình ảnh dự án</div>
-                <div class="post-engagement">
-                    <button class="engagement-btn">❤️ 24</button>
-                    <button class="engagement-btn">💬 8</button>
-                </div>
-            </article>
+    {% for post in posts %}
+    <article class="post">
+      <div class="post-header"  style="position: relative;">
 
-            <article class="post">
-                <div class="post-header">
-                    <div class="post-user-avatar">TQ</div>
-                    <div class="post-user-info">
-                        <h4>Trung Quân</h4>
-                        <div class="post-time">5 giờ trước</div>
-                    </div>
-                </div>
-                <div class="post-content">
-                    Ai cũng cần một chút động lực trong cuộc sống. Hãy luôn tin tưởng vào bản thân và không bao giờ từ bỏ ước mơ! ✨
-                    <br><br>
-                    #motivation #nevergiveup #dreams
-                </div>
-                <div class="post-engagement">
-                    <button class="engagement-btn">❤️ 56</button>
-                    <button class="engagement-btn">💬 12</button>
-                </div>
-            </article>
+    <!-- Nút delete -->
+    {% if post.user == user %}
+    <button class="delete-post-btn" onclick="deletePost({{ post.id }})" 
+            style="position: absolute; top: 5px; right: 5px; background: transparent; border: none; cursor: pointer; font-size: 18px;">
+        ✖
+    </button>
+    {% endif %}
 
-            <article class="post">
-                <div class="post-header">
-                    <div class="post-user-avatar">AT</div>
-                    <div class="post-user-info">
-                        <h4>An Thư</h4>
-                        <div class="post-time">1 ngày trước</div>
-                    </div>
-                </div>
-                <div class="post-content">
-                    Cuối tuần rồi! Ai có kế hoạch gì thú vị không? Mình đang nghĩ đến việc đi picnic ở công viên. Thời tiết đẹp quá! 🌞🌳
-                </div>
-                <div class="post-engagement">
-                    <button class="engagement-btn">❤️ <span class="count">24</span></button>
-                    <button class="engagement-btn">💬 <span class="count">8</span></button>
-                </div>
-                
-            </article>
-        </main>
-    </div>
-{% endblock %}
+        <div class="post-avatar">
+            {% if post.user.avatar %}
+            <img src="{{ post.user.avatar.url }}" alt="{{ post.user.full_name }}" />
+            {% else %} 
+            {{ post.user.full_name|slice:":2" }} 
+            {% endif %}
+        </div>
+        <div class="post-user-info">
+          <h4>{{ post.user.full_name }}</h4>
+          <div class="post-time">{{ post.created_at|timesince }} ago</div>
+        </div>
+      </div>
+      <div class="post-content">{{ post.content }}</div>
+      {% if post.media %}
+      <div class="post-media">
+        <img src="{{ post.media.url }}" alt="Hình ảnh dự án" />
+      </div>
+      {% endif %}
+      <div class="post-engagement">
+
+        <button class="engagement-btn {% if post.id in user_liked_posts %}liked{% endif %}" onclick="likePost(this, {{ post.id }})">
+            <span>❤️</span>
+            <span class="count">{{ post.likeCount }}</span>
+        </button>
+
+        <button class="engagement-btn">💬 {{ post.commentCount }}</button>
+      </div>
+    </article>
+    {% endfor %}
+  </main>
+</div>
+{% endblock %} 
 
 {% block extra_js %}
 <script src="{% static 'home/script.js' %}" defer></script>

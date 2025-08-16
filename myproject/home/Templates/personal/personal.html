@@ -142,7 +142,12 @@
         <div class="posts-container" id="posts-container">
             {% for post in posts %}
             <div class="post {% if post.id|stringformat:'s' == highlight_post_id %}highlight{% endif %}" id="post-{{ post.id }}"">
-                <div class="post-header">
+                <div class="post-header" style="position:relative">
+
+                    <button class="delete-post-btn" onclick="deletePost({{ post.id }})" 
+                    style="position: absolute; top: 5px; right: 5px; background: transparent; border: none; cursor: pointer; font-size: 18px;">
+                ✖
+            </button>
                     <div class="post-avatar">
                         {% if post.user.avatar %}
                             <img src="{{ post.user.avatar.url }}" alt="{{ post.user.full_name }}">

@@ -124,19 +124,31 @@ function closeFriendsModal() {
     document.getElementById('friendsModal').style.display = 'none';
     document.body.style.overflow = 'auto';
 }
-// Sample friends data
-const friendsData = [
-    { name: "Trần Minh Hoàng", initials: "TMH", status: "online" },
-    { name: "Lê Thị Mai", initials: "LTM", status: "online" },
-    { name: "Phạm Văn Đức", initials: "PVĐ", status: "offline" },
-    { name: "Nguyễn Thị Lan", initials: "NTL", status: "online" },
-    { name: "Hoàng Minh Tuấn", initials: "HMT", status: "offline" },
-    { name: "Vũ Thị Hương", initials: "VTH", status: "online" },
-    { name: "Đỗ Văn Nam", initials: "ĐVN", status: "offline" },
-    { name: "Bùi Thị Thảo", initials: "BTT", status: "online" },
-    { name: "Lý Văn Hùng", initials: "LVH", status: "offline" },
-    { name: "Chu Thị Nga", initials: "CTN", status: "online" }
-];
+
+function deletePost(postId) {
+    if (!confirm("Bạn có chắc muốn xóa bài viết này?")) return;
+
+    fetch(`/delete_post/${postId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            // Xóa element post khỏi DOM
+            const postEl = document.getElementById(`post-${postId}`);
+            if (postEl) postEl.remove();
+            location.reload();
+        } else {
+            alert('Xóa thất bại: ' + data.message);
+        }
+    })
+    .catch(err => console.error(err));
+}
 
 
 
