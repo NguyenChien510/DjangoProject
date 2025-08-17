@@ -1,14 +1,11 @@
-from imaplib import _Authenticator
 import random
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
-
-from realtime.models import Notification
+from django.template.loader import render_to_string
 from .models import Friendship, PostComment, PostForm, PostLike, ProfileEditForm, User
 from .models import Posts
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth import logout,authenticate,login as auth_login
+from django.contrib.auth import logout,login as auth_login
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
@@ -236,7 +233,7 @@ def delete_post(request, post_id):
 
 def get_comments(request, post_id):
     comments = PostComment.objects.filter(post_id=post_id).select_related("user").order_by("-created_at")
-    return render(request, "base/comments_list.html", {"comments": comments})
+    return render(request, "base/comments_list.html", {"comments": comments,'current_user':request.user})
 
 
 @login_required
@@ -270,14 +267,41 @@ def add_comment(request, post_id):
     post.commentCount = (post.commentCount or 0) + 1
     post.save(update_fields=['commentCount'])
 
+
+    # render partial template
+    html = render_to_string("base/comment_item.html", {"c": comment}, request=request)
+
     return JsonResponse({
-        "id": comment.id,
-        "user": request.user.full_name,
-        "avatar": request.user.avatar.url if hasattr(request.user, "avatar") and request.user.avatar else None,
-        "content": comment.content,
-        "image": comment.image.url if comment.image else None,
-        "created_at": comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-        "likeCount": comment.likeCount,
-        "parent_id": comment.parent.id if comment.parent else None,
+        "success": True,
+        "html": html,
+        "commentCount": post.commentCount
     })
 
+
+@login_required
+def delete_comment(request, comment_id):
+    try:
+        comment = PostComment.objects.get(id=comment_id)
+    except PostComment.DoesNotExist:
+        return JsonResponse({"error": "Comment not found"}, status=404)
+
+    # Chỉ cho phép chủ comment hoặc chủ bài viết xoá
+    if request.user != comment.user and request.user != comment.post.user:
+        return JsonResponse({"error": "Permission denied"}, status=403)
+
+    post = comment.post
+
+    # Xoá comment
+    comment.delete()
+
+    # Trừ commentCount
+    if post.commentCount > 0:
+        post.commentCount -= 1
+        post.save(update_fields=["commentCount"])
+
+    return JsonResponse({
+        "success": True,
+        "post_id": post.id,
+        "comment_id": comment_id,
+        "commentCount": post.commentCount
+    })

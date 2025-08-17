@@ -119,7 +119,7 @@
 
             {% comment %} Script hightlight post {% endcomment %}
             <script>
-            document.addEventListener("DOMContentLoaded", function() {
+                document.addEventListener("DOMContentLoaded", function() {
                 const highlight = "{{ highlight_post_id }}";
                 if (highlight) {
                     const el = document.getElementById("post-" + highlight);
@@ -127,7 +127,7 @@
                         el.scrollIntoView({ behavior: "smooth", block: "center" });
                     }
                 }
-            });
+                });
             </script>
 
 
@@ -230,6 +230,10 @@
         </div>
     </div>
 </div>
+
+
+
+
 
 <style>
     /* Chặn scroll body khi modal mở */
@@ -681,7 +685,7 @@
             <div class="user-avatar">
               {% if current_user.avatar %}
                 <img src="{{ current_user.avatar.url }}" alt="{{ current_user.full_name }}" />
-              {% else %} {{ current_user.full_name|slice:":2" }} {% endif %}
+              {% else %} {{ current_user.full_name|slice:":1" }} {% endif %}
             </div>
             <div class="comment-input-container">
               <textarea class="comment-input" placeholder="Viết bình luận của bạn..." name="content" id="commentInput"></textarea>
@@ -703,8 +707,6 @@
     </div>
 </div>
   
-
-
 
 <script>
     function openModal(postId) {
@@ -753,16 +755,14 @@
         const form = e.target;
         const postId = form.dataset.postId;
         const formData = new FormData(form);
-            // Lấy content và file
-    const content = formData.get("content").trim();
-    const image = formData.get("image");
-
-    // Nếu cả content và image đều trống
-    if (!content && (!image || image.size === 0)) {
-        alert("Vui lòng nhập nội dung hoặc chọn ảnh!");
-        return; // ngăn submit
-    }
-
+    
+        const content = formData.get("content").trim();
+        const image = formData.get("image");
+        if (!content && (!image || image.size === 0)) {
+            alert("Vui lòng nhập nội dung hoặc chọn ảnh!");
+            return;
+        }
+    
         fetch(`/add-comment/${postId}/`, {
             method: "POST",
             body: formData,
@@ -773,33 +773,38 @@
             if (data.error) {
                 alert(data.error);
             } else {
-                const newComment = `
-                    <div class="comment-item">
-                        <div class="comment-header">
-                            <div class="user-avatar">
-                                ${data.avatar ? `<img src="${data.avatar}" alt="${data.user}">` : data.user.charAt(0)}
-                            </div>
-                            <div class="comment-author">${data.user}</div>
-                            <div class="comment-time">just now</div>
-                        </div>
-                        <div class="comment-content">${data.content || ""}</div>
-                        ${data.image ? `
-                        <div class="comment-images">
-                            <div class="comment-image" onclick="viewImage('${data.image}')">
-                                <img src="${data.image}" alt="Ảnh bình luận">
-                            </div>
-                        </div>` : ""}
-                        <div class="comment-actions">
-                            <button class="action-btn">👍 Thích (0)</button>
-                            <button class="action-btn">💬 Trả lời</button>
-                        </div>
-                    </div>
-                `;
-                document.getElementById("commentsList").insertAdjacentHTML("afterbegin", newComment);
+                document.getElementById("commentsList")
+                    .insertAdjacentHTML("afterbegin", data.html);
                 form.reset();
             }
         });
     });
+    
+    function deleteComment(commentId, postId) {
+        if (!confirm("Bạn có chắc chắn muốn xóa bình luận này không?")) {
+            return; // hủy xóa
+        }
+        fetch(`/delete_comment/${commentId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken")
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Xoá comment khỏi DOM
+                let cmtElem = document.querySelector(`#comment-${data.comment_id}`);
+                if (cmtElem) cmtElem.remove();
+    
+                // Update commentCount
+                let countElem = document.querySelector(`#comment-count-${data.post_id}`);
+                if (countElem) {
+                    countElem.textContent = data.commentCount;
+                }
+            }
+        });
+    }
 </script>
 
 

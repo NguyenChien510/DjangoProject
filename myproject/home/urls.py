@@ -20,6 +20,7 @@ urlpatterns = [
     path('like/<int:post_id>/',viewrealtime.like_post,name='like_post'),
     path('mark_notification_read/', viewrealtime.mark_notification_read, name='mark_notification_read'),
     path('get-comments/<int:post_id>/', views.get_comments, name='get_comments'),
+    path("delete_comment/<int:comment_id>/", views.delete_comment, name="delete_comment"),
     
     
     path('postdetail/<int:post_id>', views.profile_view, name='post_detail'),

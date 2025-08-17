@@ -1,4 +1,3 @@
-{% for c in comments %}
 <div class="comment-item border-b p-3" id="comment-{{ c.id }}">
     <!-- Header -->
     <div class="comment-header flex items-center gap-3 mb-2">
@@ -13,9 +12,7 @@
             <div class="comment-author font-semibold">{{ c.user.full_name }}</div>
             <div class="comment-time text-xs text-gray-500">{{ c.created_at|timesince }}</div>
         </div>
-        {% if current_user == c.user or current_user == c.post.user %}
-            <button class="delete-comment-btn ml-auto text-red-500 font-bold" onclick="deleteComment({{c.id}}, {{c.post.id}})">×</button>
-        {% endif %}
+        <button class="delete-comment-btn ml-auto text-red-500 font-bold" onclick="deleteComment({{c.id}}, {{c.post.id}})">×</button>
     </div>
 
     <!-- Nội dung -->
@@ -23,7 +20,7 @@
         {{ c.content }}
     </div>
 
-    <!-- Ảnh (1 ảnh duy nhất) -->
+    <!-- Ảnh -->
     {% if c.image %}
     <div class="comment-images mb-2">
         <div class="comment-image w-20 h-20 overflow-hidden rounded cursor-pointer">
@@ -38,6 +35,3 @@
         <button class="action-btn hover:text-blue-500">💬 Trả lời</button>
     </div>
 </div>
-{% empty %}
-<p class="text-gray-500 p-3" style="padding:20px;">Chưa có bình luận nào.</p>
-{% endfor %}
