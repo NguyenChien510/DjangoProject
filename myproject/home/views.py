@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 
 from realtime.models import Notification
-from .models import Friendship, PostForm, PostLike, ProfileEditForm, User
+from .models import Friendship, PostComment, PostForm, PostLike, ProfileEditForm, User
 from .models import Posts
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import logout,authenticate,login as auth_login
@@ -232,4 +232,52 @@ def delete_post(request, post_id):
 
     post.delete()
     return JsonResponse({'status': 'ok'})
+
+
+def get_comments(request, post_id):
+    comments = PostComment.objects.filter(post_id=post_id).select_related("user").order_by("-created_at")
+    return render(request, "base/comments_list.html", {"comments": comments})
+
+
+@login_required
+def add_comment(request, post_id):
+    try:
+        post = Posts.objects.get(id=post_id)
+    except Posts.DoesNotExist:
+        return JsonResponse({"error": "Post not found"}, status=404)
+
+    content = request.POST.get("content", "").strip()
+    parent_id = request.POST.get("parent_id")  # Nếu là reply
+    image = request.FILES.get("image")  # file ảnh
+
+    parent = None
+    if parent_id:
+        try:
+            parent = PostComment.objects.get(id=parent_id, post=post)
+        except PostComment.DoesNotExist:
+            return JsonResponse({"error": "Parent comment not found"}, status=404)
+
+    # Tạo comment mới
+    comment = PostComment.objects.create(
+        post=post,
+        user=request.user,
+        content=content,
+        image=image if image else None,
+        parent=parent
+    )
+
+    # Tăng commentCount của post
+    post.commentCount = (post.commentCount or 0) + 1
+    post.save(update_fields=['commentCount'])
+
+    return JsonResponse({
+        "id": comment.id,
+        "user": request.user.full_name,
+        "avatar": request.user.avatar.url if hasattr(request.user, "avatar") and request.user.avatar else None,
+        "content": comment.content,
+        "image": comment.image.url if comment.image else None,
+        "created_at": comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        "likeCount": comment.likeCount,
+        "parent_id": comment.parent.id if comment.parent else None,
+    })
 

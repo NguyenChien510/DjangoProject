@@ -24,7 +24,9 @@ body {
 .delete-post-btn:hover{
     color: red;
 }
-
+.post.highlight {
+    border: 2px solid gray;
+}
 .profile-box {
     margin-top: 80px;
     background: rgba(255, 255, 255, 0.95);
@@ -293,7 +295,7 @@ body {
 .posts-container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 50px;
 }
 
 .post {

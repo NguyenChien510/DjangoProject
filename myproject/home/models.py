@@ -80,12 +80,29 @@ class PostLike(models.Model):
 
     class Meta:
         unique_together = ('post', 'user')  # 1 người chỉ like 1 lần
+
         
-class Comment(models.Model):
-    post = models.ForeignKey(Posts, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
-    content = models.TextField()
+class PostComment(models.Model):
+    post = models.ForeignKey('Posts', on_delete=models.CASCADE, related_name='comments')  # Comment thuộc bài viết nào
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')    # Ai comment
+    content = models.TextField(blank=True, null=True)                                    # Nội dung
+    image = models.ImageField(upload_to='comments/', blank=True, null=True)              # Ảnh đính kèm
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')  
     created_at = models.DateTimeField(auto_now_add=True)
+    likeCount = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['-created_at']   # Comment mới lên trước    
+        
+class CommentLike(models.Model):
+    comment = models.ForeignKey(PostComment, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comment_likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('comment', 'user')  # đảm bảo 1 user chỉ like 1 lần    
+
+        
     
 
 class PostForm(forms.ModelForm):

@@ -1,0 +1,42 @@
+{% for c in comments %}
+<div class="comment-item border-b p-3">
+    <!-- Header -->
+    <div class="comment-header flex items-center gap-3 mb-2">
+        <div class="user-avatar w-10 h-10 flex items-center justify-center rounded-full bg-gray-200">
+            {% if c.user.avatar %}
+                <img src="{{ c.user.avatar.url }}" class="w-10 h-10 rounded-full" />
+            {% else %}
+                <span class="font-bold">{{ c.user.full_name|first|upper }}</span>
+            {% endif %}
+        </div>
+        <div>
+            <div class="comment-author font-semibold">{{ c.user.full_name }}</div>
+            <div class="comment-time text-xs text-gray-500">{{ c.created_at|timesince }}</div>
+        </div>
+        <button class="delete-comment-btn ml-auto text-red-500 font-bold" 
+        onclick="deleteComment({{ c.id }})">×</button>
+    </div>
+
+    <!-- Nội dung -->
+    <div class="comment-content mb-2">
+        {{ c.content }}
+    </div>
+
+    <!-- Ảnh (1 ảnh duy nhất) -->
+    {% if c.image %}
+    <div class="comment-images mb-2">
+        <div class="comment-image w-20 h-20 overflow-hidden rounded cursor-pointer">
+            <img src="{{ c.image.url }}" alt="Ảnh bình luận" class="w-full h-full object-cover" />
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Hành động -->
+    <div class="comment-actions flex gap-4 text-sm text-gray-600">
+        <button class="action-btn hover:text-blue-500">👍 Thích ({{c.likeCount}})</button>
+        <button class="action-btn hover:text-blue-500">💬 Trả lời</button>
+    </div>
+</div>
+{% empty %}
+<p class="text-gray-500 p-3" style="padding:20px;">Chưa có bình luận nào.</p>
+{% endfor %}

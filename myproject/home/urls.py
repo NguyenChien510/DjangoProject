@@ -19,8 +19,11 @@ urlpatterns = [
     path('delete_post/<int:post_id>/',views.delete_post,name='delete_post'),
     path('like/<int:post_id>/',viewrealtime.like_post,name='like_post'),
     path('mark_notification_read/', viewrealtime.mark_notification_read, name='mark_notification_read'),
+    path('get-comments/<int:post_id>/', views.get_comments, name='get_comments'),
     
-    path('postdetail/<int:post_id>', views.profile_view, name='post_detail')
+    
+    path('postdetail/<int:post_id>', views.profile_view, name='post_detail'),
+    path('add-comment/<int:post_id>/', views.add_comment, name='add_comment'),
 ]
 
 if settings.DEBUG:
