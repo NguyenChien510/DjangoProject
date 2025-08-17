@@ -61,11 +61,11 @@
                 <!-- Người này là người nhận -->
                 <form method="post" action="{% url 'accept_request' profile_user.id %}">
                     {% csrf_token %}
-                    <button class="btn btn-success">✅ Đồng ý</button>
+                    <button class="btn btn-success" style="background:#57ff57">✅ Đồng ý</button>
                 </form>
                 <form method="post" action="{% url 'cancel_request' profile_user.id %}">
                     {% csrf_token %}
-                    <button class="btn btn-danger">❌ Từ chối</button>
+                    <button class="btn btn-danger" style="background:#c95858">❌ Từ chối</button>
                 </form>
             {% endif %}
 
@@ -73,7 +73,7 @@
             <!-- Đã là bạn bè -->
             <form method="post" action="{% url 'delete_friend' profile_user.id %}">
                 {% csrf_token %}
-                <button class="btn btn-danger">❌ Hủy kết bạn</button>
+                <button class="btn btn-danger" style="background:#c95858">❌ Hủy kết bạn</button>
             </form>
             {% endif %}
 

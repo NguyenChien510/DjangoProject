@@ -29,6 +29,27 @@ body {
     margin: 0 auto;
 }
 
+
+#notification-list {
+    max-height: 230px; /* chiều cao tương ứng khoảng 4 item (tuỳ padding/margin bạn chỉnh lại) */
+    overflow-y: auto;  /* bật scroll dọc khi vượt quá */
+    overflow-x: hidden;
+}
+
+/* tuỳ chỉnh scrollbar cho đẹp */
+#notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+#notification-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+#notification-list::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+
+
 .logo {
     font-size: 1.8rem;
     font-weight: bold;

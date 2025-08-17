@@ -16,7 +16,7 @@
     <!-- Navbar chung -->
     <nav class="navbar">
         <div class="nav-content">
-            <div class="logo">SocialHub</div>
+            <a href="{% url 'home' %}" class="logo">SocialHub</a>
             <div class="search-box">
                 <input type="text" class="search-input" placeholder="Tìm kiếm bạn bè">
             </div>
@@ -24,11 +24,6 @@
                 <a href="{% url 'home' %}" class="nav-icon" title="Trang chủ" style="text-decoration:none">🏠</a>
                 <a href="{% url 'home' %}" class="nav-icon" title="Tin nhắn" style="text-decoration:none">💬</a>
                 
-                {% comment %} <div class="nav-icon has-dropdown" title="Thông báo">
-                    🔔
-                    <span id="notification-count" class="notification-badge">0</span>
-                    <div id="notification-list" class="dropdown"></div>
-                </div> {% endcomment %}
                 <div class="nav-icon has-dropdown" title="Thông báo">
                     🔔
                     <span id="notification-count" class="notification-badge">{{ unread_count }}</span>
@@ -55,7 +50,7 @@
                     background-color: #f0f8ff; /* nền nhạt để nổi bật */
                     }   
                 </style>
-
+{% comment %} 
                 <script>
                     const socket = new WebSocket(
                         `ws://${window.location.host}/ws/notifications/`
@@ -72,7 +67,78 @@
                         list.prepend(item); // Thêm lên đầu
                     };
                 </script>
-                
+                 {% endcomment %}
+
+
+<script>
+        // Tạo kết nối websocket
+        const socket = new WebSocket(
+            `ws://${window.location.host}/ws/notifications/`
+        );
+    
+    socket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    document.getElementById('notification-count').innerText = data.count;
+
+    const list = document.getElementById('notification-list');
+
+    let html = "";
+    if (data.post_id) {
+        // Nếu noti gắn với bài post → có <a>
+        html = `
+            <div class="dropdown-item unread" data-id="${data.id}">
+                <a href="/personal?highlight=${data.post_id}">${data.message}</a>
+            </div>`;
+    } else {
+        // Nếu chỉ là thông báo text
+        html = `
+            <div class="dropdown-item unread" data-id="${data.id}">
+                📢 ${data.message}
+            </div>`;
+    }
+
+    list.insertAdjacentHTML("afterbegin", html);
+
+    // Gắn sự kiện click cho <a> mới
+    const newLink = list.querySelector(".dropdown-item:first-child a");
+    if (newLink) {
+        newLink.addEventListener("click", function(e){
+            e.preventDefault();
+            const notificationDiv = this.closest('.dropdown-item');
+            const notificationId = notificationDiv.dataset.id;
+            const href = this.href;
+
+            fetch("{% url 'mark_notification_read' %}?id=" + notificationId)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'ok') {
+                    notificationDiv.classList.remove('unread');
+                    let countSpan = document.getElementById('notification-count');
+                    let count = parseInt(countSpan.innerText);
+                    countSpan.innerText = Math.max(0, count - 1);
+                }
+                window.location.href = href;
+            });
+        });
+    }
+};</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                 
 
                 
 <script>
