@@ -16,7 +16,7 @@
                 {% if profile_user.avatar %}
                     <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.full_name }}">
                 {% else %}
-                    {{ profile_user.full_name|slice:":2" }}
+                    {{ profile_user.full_name|slice:":1" }}
                 {% endif %}
             </div>
 
@@ -98,7 +98,7 @@
                         {% if current_user.avatar %}
                             <img src="{{ current_user.avatar.url }}" alt="{{ current_user.full_name }}">
                         {% else %}
-                            {{ current_user.full_name|slice:":2" }}
+                            {{ current_user.full_name|slice:":1" }}
                         {% endif %}
                     </div>
                     <span style="color: #666; font-size: 1.1rem;">Bạn đang nghĩ gì?</span>
@@ -145,7 +145,7 @@
                         {% if post.user.avatar %}
                             <img src="{{ post.user.avatar.url }}" alt="{{ post.user.full_name }}">
                         {% else %}
-                            {{ post.user.full_name|slice:":2" }}
+                            {{ post.user.full_name|slice:":1" }}
                         {% endif %}
                     </div>
                     <div class="post-meta">
@@ -196,7 +196,7 @@
                     {% if friend.avatar %}
                     <img src="{{ friend.avatar }}" alt="{{ friend.name }}">
                     {% else %}
-                    {{ friend.name|slice:":2" }}
+                    {{ friend.name|slice:":1" }}
                     {% endif %}
                 </div>
                 <div class="friend-info">
@@ -773,8 +773,16 @@
             if (data.error) {
                 alert(data.error);
             } else {
-                document.getElementById("commentsList")
-                    .insertAdjacentHTML("afterbegin", data.html);
+                const commentsList = document.getElementById("commentsList");
+
+                // Xóa dòng "Chưa có bình luận nào" nếu có
+                const noComment = commentsList.querySelector(".no-comment");
+                if (noComment) {
+                    noComment.remove();
+                }
+        
+                // Thêm comment mới
+                commentsList.insertAdjacentHTML("afterbegin", data.html);
                 form.reset();
             }
         });

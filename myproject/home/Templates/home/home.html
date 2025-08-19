@@ -18,7 +18,7 @@
           <div class="post-avatar">
             {% if user.avatar %}
             <img src="{{ user.avatar.url }}" alt="{{ user.full_name }}" />
-            {% else %} {{ user.full_name|slice:":2" }} {% endif %}
+            {% else %} {{ user.full_name|slice:":1" }} {% endif %}
           </div>
           <textarea
             name="content"
@@ -60,7 +60,7 @@
             {% if post.user.avatar %}
                 <img src="{{ post.user.avatar.url }}" alt="{{ post.user.full_name }}" />
             {% else %} 
-                {{ post.user.full_name|slice:":2" }} 
+                {{ post.user.full_name|slice:":1" }} 
             {% endif %}
         </a>
     </div>
@@ -622,7 +622,6 @@
           alert("Vui lòng nhập nội dung hoặc chọn ảnh!");
           return;
       }
-  
       fetch(`/add-comment/${postId}/`, {
           method: "POST",
           body: formData,
@@ -633,9 +632,17 @@
           if (data.error) {
               alert(data.error);
           } else {
-              document.getElementById("commentsList")
-                  .insertAdjacentHTML("afterbegin", data.html);
-              form.reset();
+            const commentsList = document.getElementById("commentsList");
+
+            // Xóa dòng "Chưa có bình luận nào" nếu có
+            const noComment = commentsList.querySelector(".no-comment");
+            if (noComment) {
+                noComment.remove();
+            }
+    
+            // Thêm comment mới
+            commentsList.insertAdjacentHTML("afterbegin", data.html);
+            form.reset();
           }
       });
   });
