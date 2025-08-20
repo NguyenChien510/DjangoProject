@@ -31,10 +31,18 @@
                         {% for notification in notifications %}
                             <div class="dropdown-item {% if not notification.is_read %}unread{% endif %}" data-id="{{ notification.id }}">
                                 {% if notification.post %}
-                                    <a href="{% url 'personal' %}?highlight={{ notification.post.id }}">{{ notification.message }}</a>
-                                {% else %}
-                                    📢 {{ notification.message }}
-                                {% endif %}
+                                    {% if notification.comment %}
+                                        <a href="{% url 'personal' %}?highlight={{ notification.post.id }}&comment={{ notification.comment.id }}">
+                                            {{ notification.message }}
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'personal' %}?highlight={{ notification.post.id }}">
+                                            {{ notification.message }}
+                                        </a>
+                                    {% endif %}
+                            {% else %}
+                                📢 {{ notification.message }}
+                            {% endif %}
                                 {% comment %} <p style="font-size:0.8rem;position:relative;left:125px;">{{notification.created_at|timesince}} ago</p> {% endcomment %}
                             </div>
                         {% empty %}
@@ -50,24 +58,6 @@
                     background-color: #f0f8ff; /* nền nhạt để nổi bật */
                     }   
                 </style>
-{% comment %} 
-                <script>
-                    const socket = new WebSocket(
-                        `ws://${window.location.host}/ws/notifications/`
-                    );
-                
-                    socket.onmessage = function(e) {
-                        const data = JSON.parse(e.data);
-                        document.getElementById('notification-count').innerText = data.count;
-                
-                        const list = document.getElementById('notification-list');
-                        const item = document.createElement('div');
-                        item.classList.add('dropdown-item');
-                        item.textContent = data.message;
-                        list.prepend(item); // Thêm lên đầu
-                    };
-                </script>
-                 {% endcomment %}
 
 
 <script>
@@ -84,18 +74,33 @@
 
     let html = "";
     if (data.post_id) {
-        // Nếu noti gắn với bài post → có <a>
-        html = `
-            <div class="dropdown-item unread" data-id="${data.id}">
-                <a href="/personal?highlight=${data.post_id}">${data.message}</a>
-            </div>`;
+        if (data.comment_id) {
+            // Có cả post & comment
+            html = `
+                <div class="dropdown-item unread" data-id="${data.id}">
+                    <a href="/personal?highlight=${data.post_id}&comment=${data.comment_id}">
+                        ${data.message}
+                    </a>
+                </div>`;
+        } else {
+            // Chỉ có post
+            html = `
+                <div class="dropdown-item unread" data-id="${data.id}">
+                    <a href="/personal?highlight=${data.post_id}">
+                        ${data.message}
+                    </a>
+                </div>`;
+        }
     } else {
-        // Nếu chỉ là thông báo text
+        // Thông báo chỉ là text
         html = `
             <div class="dropdown-item unread" data-id="${data.id}">
                 📢 ${data.message}
             </div>`;
     }
+
+
+
 
     list.insertAdjacentHTML("afterbegin", html);
 

@@ -9,6 +9,7 @@ from home.models import PostComment
 from .utils import send_notification
 from django.contrib.auth.decorators import login_required
 from .models import Notification
+from django.template.loader import render_to_string
 
 @login_required
 def like_post(request, post_id):
@@ -50,49 +51,59 @@ def like_post(request, post_id):
 
 
 @login_required
-def comment_post(request, post_id):
-    post = get_object_or_404(Posts, id=post_id)
+def add_comment(request, post_id):
+    try:
+        post = Posts.objects.get(id=post_id)
+    except Posts.DoesNotExist:
+        return JsonResponse({"error": "Post not found"}, status=404)
+
     content = request.POST.get("content", "").strip()
+    parent_id = request.POST.get("parent_id")  # Nếu là reply
+    image = request.FILES.get("image")  # file ảnh
 
-    if not content:
-        return JsonResponse({"status": "error", "message": "Nội dung comment không được để trống."}, status=400)
+    parent = None
+    if parent_id:
+        try:
+            parent = PostComment.objects.get(id=parent_id, post=post)
+        except PostComment.DoesNotExist:
+            return JsonResponse({"error": "Parent comment not found"}, status=404)
 
-    # Tạo comment
+    # Tạo comment mới
     comment = PostComment.objects.create(
         post=post,
         user=request.user,
-        content=content
+        content=content,
+        image=image if image else None,
+        parent=parent
     )
 
-    # Update số lượng comment
-    post.commentCount = PostComment.objects.filter(post=post).count()
-    post.save(update_fields=["commentCount"])
+    # Tăng commentCount của post
+    post.commentCount = (post.commentCount or 0) + 1
+    post.save(update_fields=['commentCount'])
 
     # Gửi noti cho chủ bài viết (nếu không phải tự comment)
     if post.user != request.user:
         send_notification(
             user=post.user,
             message=f"💬 {request.user.full_name} đã bình luận bài viết của bạn",
-            post=post
+            post=post,
+            comment=comment,
         )
 
+    # render partial template
+    html = render_to_string("base/comment_item.html", {"c": comment}, request=request)
+
     return JsonResponse({
-        "status": "success",
-        "commentCount": post.commentCount,
-        "comment": {
-            "id": comment.id,
-            "user": comment.user.full_name,
-            "content": comment.content,
-            "created_at": comment.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        }
+        "success": True,
+        "html": html,
+        "commentCount": post.commentCount
     })
 
 
-@login_required
-def delete_comment(request, comment_id):
-    comment = get_object_or_404(PostComment, id=comment_id, user=request.user)
-    comment.delete()
-    return JsonResponse({"status": "deleted"})
+
+
+
+
 
 
 

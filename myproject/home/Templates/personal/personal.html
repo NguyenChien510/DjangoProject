@@ -117,19 +117,83 @@
         </div>
         {% endif %}
 
-            {% comment %} Script hightlight post {% endcomment %}
-            <script>
+            {% comment %} <script>  CODE CHAY AUTO OPEN MODAL
                 document.addEventListener("DOMContentLoaded", function() {
-                const highlight = "{{ highlight_post_id }}";
-                if (highlight) {
-                    const el = document.getElementById("post-" + highlight);
-                    if (el) {
-                        el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    const highlightPostId = "{{ highlight_post_id }}";
+                    const highlightCommentId = "{{ highlight_comment_id }}";
+                
+                    if (highlightPostId) {
+                        const postEl = document.getElementById("post-" + highlightPostId);
+                        if (postEl) {
+                            postEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                            postEl.classList.add("highlight");
+                
+                            // Nếu có comment → mở modal và highlight comment
+                            if (highlightCommentId) {
+                                setTimeout(() => {
+                                    openModal(highlightPostId);
+                                    // Chờ modal load xong comments
+                                    setTimeout(() => {
+                                        const commentEl = document.getElementById("comment-" + highlightCommentId);
+                                        if (commentEl) {
+                                            commentEl.classList.add("highlight-comment");
+                                            commentEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                                        }
+                                    }, 800);
+                                }, 500);
+                            }
+                        }
                     }
-                }
                 });
-            </script>
+                </script> {% endcomment %}
+                {% comment %} Script highlight post {% endcomment %}
 
+                {% comment %} CODE DANG TEST CHI HIEN KHI CO highlight {% endcomment %}
+                <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const highlightPostId = "{{ highlight_post_id|default:'' }}";
+        const highlightCommentId = "{{ highlight_comment_id|default:'' }}";
+    
+        if (highlightPostId && highlightPostId !== "None") {
+            const postEl = document.getElementById("post-" + highlightPostId);
+            if (postEl) {
+                postEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                postEl.classList.add("highlight");
+    
+                // Nếu có comment id thực sự → mới mở modal
+                if (highlightCommentId && highlightCommentId !== "None") {
+                    setTimeout(() => {
+                        openModal(highlightPostId);
+    
+                        // Chờ modal load xong comments
+                        setTimeout(() => {
+                            const commentEl = document.getElementById("comment-" + highlightCommentId);
+                            if (commentEl) {
+                                commentEl.classList.add("highlight-comment");
+                                commentEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                            }
+                        }, 800);
+                    }, 500);
+                }
+            }
+        }
+    });
+    </script>
+    
+
+
+            <style>
+                .highlight-comment {
+                    background: #fff3cd;
+                    border-left: 3px solid #ffc107;
+                    padding-left: 8px;
+                    animation: blink 1s ease-in-out 3;
+                }
+                
+                @keyframes blink {
+                    50% { opacity: 0.5; }
+                }
+            </style>
 
         <!-- Posts Container -->
         <div class="posts-container" id="posts-container">
@@ -727,7 +791,6 @@
             document.body.classList.add("no-scroll");
           });
     }
-
     function closeModal() {
         const overlay = document.getElementById("modal2Overlay");
         overlay.classList.remove("active");
@@ -735,20 +798,17 @@
         // cho phép scroll lại
         document.body.classList.remove("no-scroll");
     }
-
     function closeModalOnOverlay(event) {
         if (event.target === event.currentTarget) {
             closeModal();
         }
     }
-
     // Bắt sự kiện ESC
     document.addEventListener("keydown", function(e) {
         if (e.key === "Escape") {
             closeModal();
         }
     });
-
     // Submit comment
     document.getElementById("commentForm").addEventListener("submit", function(e) {
         e.preventDefault();

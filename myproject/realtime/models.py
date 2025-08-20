@@ -1,5 +1,5 @@
 from django.db import models
-from home.models import User,Posts
+from home.models import User,Posts,PostComment
 # Create your models here.
 
 class Notification(models.Model):
@@ -8,3 +8,7 @@ class Notification(models.Model):
     post = models.ForeignKey(Posts, on_delete=models.CASCADE, null=True, blank=True)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    comment = models.ForeignKey(PostComment, on_delete=models.CASCADE, null=True, blank=True)  # liên kết comment
+    
+    class Meta:
+        ordering = ['-created_at']  # mặc định sắp xếp noti mới nhất lên trước

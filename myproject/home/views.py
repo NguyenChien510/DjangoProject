@@ -119,6 +119,7 @@ def profile_view(request, user_id =None):
     )    
     
     highlight_post_id = request.GET.get('highlight')
+    highlight_comment_id = request.GET.get("comment")
     
     context = {
         'profile_user': profile_user,
@@ -130,6 +131,7 @@ def profile_view(request, user_id =None):
         'friendship_sender_id': friendship_sender_id,
         'friends':friends,
         'highlight_post_id': highlight_post_id, 
+        'highlight_comment_id': highlight_comment_id,
     }
     return render(request,'personal/personal.html',context)
 
@@ -234,48 +236,6 @@ def delete_post(request, post_id):
 def get_comments(request, post_id):
     comments = PostComment.objects.filter(post_id=post_id).select_related("user").order_by("-created_at")
     return render(request, "base/comments_list.html", {"comments": comments,'current_user':request.user})
-
-
-@login_required
-def add_comment(request, post_id):
-    try:
-        post = Posts.objects.get(id=post_id)
-    except Posts.DoesNotExist:
-        return JsonResponse({"error": "Post not found"}, status=404)
-
-    content = request.POST.get("content", "").strip()
-    parent_id = request.POST.get("parent_id")  # Nếu là reply
-    image = request.FILES.get("image")  # file ảnh
-
-    parent = None
-    if parent_id:
-        try:
-            parent = PostComment.objects.get(id=parent_id, post=post)
-        except PostComment.DoesNotExist:
-            return JsonResponse({"error": "Parent comment not found"}, status=404)
-
-    # Tạo comment mới
-    comment = PostComment.objects.create(
-        post=post,
-        user=request.user,
-        content=content,
-        image=image if image else None,
-        parent=parent
-    )
-
-    # Tăng commentCount của post
-    post.commentCount = (post.commentCount or 0) + 1
-    post.save(update_fields=['commentCount'])
-
-
-    # render partial template
-    html = render_to_string("base/comment_item.html", {"c": comment}, request=request)
-
-    return JsonResponse({
-        "success": True,
-        "html": html,
-        "commentCount": post.commentCount
-    })
 
 
 @login_required

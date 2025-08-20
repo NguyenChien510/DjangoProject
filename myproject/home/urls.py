@@ -24,7 +24,7 @@ urlpatterns = [
     
     
     path('postdetail/<int:post_id>', views.profile_view, name='post_detail'),
-    path('add-comment/<int:post_id>/', views.add_comment, name='add_comment'),
+    path('add-comment/<int:post_id>/', viewrealtime.add_comment, name='add_comment'),
 ]
 
 if settings.DEBUG:
