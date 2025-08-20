@@ -117,40 +117,8 @@
         </div>
         {% endif %}
 
-            {% comment %} <script>  CODE CHAY AUTO OPEN MODAL
-                document.addEventListener("DOMContentLoaded", function() {
-                    const highlightPostId = "{{ highlight_post_id }}";
-                    const highlightCommentId = "{{ highlight_comment_id }}";
-                
-                    if (highlightPostId) {
-                        const postEl = document.getElementById("post-" + highlightPostId);
-                        if (postEl) {
-                            postEl.scrollIntoView({ behavior: "smooth", block: "center" });
-                            postEl.classList.add("highlight");
-                
-                            // Nếu có comment → mở modal và highlight comment
-                            if (highlightCommentId) {
-                                setTimeout(() => {
-                                    openModal(highlightPostId);
-                                    // Chờ modal load xong comments
-                                    setTimeout(() => {
-                                        const commentEl = document.getElementById("comment-" + highlightCommentId);
-                                        if (commentEl) {
-                                            commentEl.classList.add("highlight-comment");
-                                            commentEl.scrollIntoView({ behavior: "smooth", block: "center" });
-                                        }
-                                    }, 800);
-                                }, 500);
-                            }
-                        }
-                    }
-                });
-                </script> {% endcomment %}
-                {% comment %} Script highlight post {% endcomment %}
-
-                {% comment %} CODE DANG TEST CHI HIEN KHI CO highlight {% endcomment %}
-                <script>
-    document.addEventListener("DOMContentLoaded", function() {
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
         const highlightPostId = "{{ highlight_post_id|default:'' }}";
         const highlightCommentId = "{{ highlight_comment_id|default:'' }}";
     
