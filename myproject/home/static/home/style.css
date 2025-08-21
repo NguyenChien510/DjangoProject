@@ -7,7 +7,8 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+    background : #c4c4c4;
     min-height: 100vh;
     color: #333;
 }
@@ -30,7 +31,7 @@ body {
 .container {
     max-width: 600px;
     margin: 0 auto;
-    padding: 100px 2rem 2rem;
+    padding: 45px 2rem 2rem;
 }
 
 
@@ -43,10 +44,10 @@ body {
 
 .create-post {
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
+    border-radius: 12px;
     padding: 1.5rem;
     backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); */
 }
 
 .post-input {
@@ -136,8 +137,8 @@ body {
 
 .post {
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    padding: 1.5rem;
+    border-radius: 12px;
+    padding: 1.2rem;
     backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
