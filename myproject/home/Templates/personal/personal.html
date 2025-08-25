@@ -65,7 +65,7 @@
                 </form>
                 <form method="post" action="{% url 'cancel_request' profile_user.id %}">
                     {% csrf_token %}
-                    <button class="btn btn-danger" style="background:#c95858">❌ Từ chối</button>
+                    <button class="btn btn-danger" style="background:#ff9095">❌ Từ chối</button>
                 </form>
             {% endif %}
 
@@ -73,7 +73,7 @@
             <!-- Đã là bạn bè -->
             <form method="post" action="{% url 'delete_friend' profile_user.id %}">
                 {% csrf_token %}
-                <button class="btn btn-danger" style="background:#c95858">❌ Hủy kết bạn</button>
+                <button class="btn btn-danger" style="background:#ff9095">❌ Hủy kết bạn</button>
             </form>
             {% endif %}
 

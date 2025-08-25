@@ -1,0 +1,55 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'findfriend/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="header">
+    <h1>Kết quả tìm kiếm cho: "{{ keyword }}"</h1>
+  </div>
+
+  {% if keyword %}
+    {% if results %}
+      <div class="friends-list">
+        {% for user, mutual in results %}
+        <div class="friend-item">
+          <div class="friend-left">
+            {% if user.avatar %}
+              <a href="{% url 'personal_with_id' user.id %}" style="text-decoration:none">
+              <img src="{{ user.avatar.url }}" alt="{{ user.full_name }}" class="avatar">
+              <a/>
+            {% else %}
+              <a href="{% url 'personal_with_id' user.id %}" style="text-decoration:none">
+              <div class="avatar">{{ user.full_name|slice:":1" }}</div>
+              <a/>
+            {% endif %}
+            <div class="friend-info">
+              <a href="{% url 'personal_with_id' user.id %}" style="text-decoration:none">
+              <h3>{{ user.full_name }}</h3>
+              </a>
+              <p>{{ mutual }} bạn chung</p>
+            </div>
+          </div>
+          {% comment %} <button class="add-friend-btn">Thêm bạn</button> {% endcomment %}
+          <form method="post" action="{% url 'add_friend' user.id %}">
+            {% csrf_token %}
+            <button class="add-friend-btn">Thêm bạn bè</button>
+        </form>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="no-results">Không tìm thấy kết quả nào cho "{{ keyword }}"</div>
+    {% endif %}
+  {% else %}
+    <div class="no-results">Vui lòng nhập từ khóa để tìm kiếm bạn bè.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'findfriend/script.js' %}" defer></script>
+{% endblock %}

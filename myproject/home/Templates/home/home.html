@@ -20,11 +20,9 @@
             <img src="{{ user.avatar.url }}" alt="{{ user.full_name }}" />
             {% else %} {{ user.full_name|slice:":1" }} {% endif %}
           </div>
-          <textarea
-            name="content"
-            class="post-textarea"
-            placeholder="Bạn đang nghĩ gì?"
-          ></textarea>
+          <div id="editor" contenteditable="true" placeholder="Bạn đang nghĩ gì?"
+          style="border:1px solid #ccc; padding:10px; min-height:100px;"></div>
+          <input type="hidden" name="content" id="hidden-content">
         </div>
         <div class="post-actions">
           <div class="post-options">
@@ -92,7 +90,13 @@
 </div>
 
 
-
+{% if messages %}
+<div id="toast-container">
+  {% for message in messages %}
+  <div class="toast {{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
 
 
 <style>

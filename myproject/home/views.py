@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from .models import Friendship, PostComment, PostForm, PostLike, ProfileEditForm, User
 from .models import Posts
 from django.contrib.auth import logout,login as auth_login
-from django.db.models import Q
+from django.db.models import Q,Count
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
@@ -72,6 +72,7 @@ def create_post(request):
         post = form.save(commit=False)
         post.user = request.user
         post.save()
+        messages.success(request, "Đăng bài thành công!")  # thêm dòng này
     return redirect('home')
 
 @login_required(login_url='login')
@@ -265,3 +266,30 @@ def delete_comment(request, comment_id):
         "comment_id": comment_id,
         "commentCount": post.commentCount
     })
+    
+
+@login_required
+def findfriend(request):
+    keyword = request.GET.get("q", "")
+    user = request.user
+    
+    results = []
+    if keyword:
+        # tìm user theo tên (loại bỏ chính mình)
+        users = User.objects.filter(
+            Q(full_name__icontains=keyword)
+        ).exclude(id=user.id)
+
+        # danh sách bạn của current user
+        my_friends = set([f.id for f in user.get_friends()])   # <-- sửa ở đây
+
+        # tính số bạn chung
+        for u in users:
+            u_friends = set([f.id for f in u.get_friends()])   # <-- sửa ở đây
+            mutual_count = len(my_friends & u_friends)
+            results.append((u, mutual_count))
+
+        # sắp xếp giảm dần theo mutual_count
+        results.sort(key=lambda x: x[1], reverse=True)
+
+    return render(request, "findfriend/findfriend.html", {"results": results, "keyword": keyword})

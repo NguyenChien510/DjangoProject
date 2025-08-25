@@ -25,6 +25,7 @@ urlpatterns = [
     
     path('postdetail/<int:post_id>', views.profile_view, name='post_detail'),
     path('add-comment/<int:post_id>/', viewrealtime.add_comment, name='add_comment'),
+    path('findfriend',views.findfriend,name='findfriend'),
 ]
 
 if settings.DEBUG:

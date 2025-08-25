@@ -142,3 +142,26 @@ function deletePost(postId) {
     })
     .catch(err => console.error(err));
 }
+
+
+document.getElementById("image-upload").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const img = document.createElement("img");
+        img.src = ev.target.result;
+        img.style.maxWidth = "150px";
+        document.getElementById("editor").appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+
+  const form = document.querySelector("form");
+  form.addEventListener("submit", function() {
+    // Lấy text (chỉ text, bỏ thẻ <img>)
+    document.getElementById("hidden-content").value = 
+        document.getElementById("editor").innerText.trim();
+  });

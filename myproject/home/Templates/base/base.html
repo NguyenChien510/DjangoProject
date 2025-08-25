@@ -18,8 +18,17 @@
         <div class="nav-content">
             <a href="{% url 'home' %}" class="logo">SocialHub</a>
             <div class="search-box">
-                <input type="text" class="search-input" placeholder="Tìm kiếm bạn bè">
-            </div>
+                <form action="{% url 'findfriend' %}" method="get">
+                  <input 
+                    type="text" 
+                    id="searchInput" 
+                    name="q" 
+                    class="search-input" 
+                    placeholder="Tìm kiếm bạn bè..."
+                  >
+                </form>
+              </div>
+              
             <div class="nav-icons">
                 <a href="{% url 'home' %}" class="nav-icon" title="Trang chủ" style="text-decoration:none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">

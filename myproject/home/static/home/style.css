@@ -8,7 +8,8 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
-    background : #c4c4c4;
+    /* background : #c4c4c4; */
+    background: #f0ecec;
     min-height: 100vh;
     color: #333;
 }
@@ -47,7 +48,7 @@ body {
     border-radius: 12px;
     padding: 1.5rem;
     backdrop-filter: blur(10px);
-    /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); */
+    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1);
 }
 
 .post-input {
@@ -125,7 +126,7 @@ body {
     color: white;
     border: none;
     padding: 0.8rem 2rem;
-    border-radius: 25px;
+    border-radius: 10px;
     font-weight: bold;
     cursor: pointer;
     transition: transform 0.3s ease;
@@ -288,3 +289,45 @@ input[type="file"] {
 
 
 
+/* Ô nhập text + ảnh */
+#editor {
+    min-height: 100px;
+    outline: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #333;
+    width: 100%;
+  }
+  
+  /* Placeholder cho contenteditable */
+  #editor:empty:before {
+    content: attr(placeholder);
+    color: #aaa;
+    pointer-events: none;
+  }
+
+  #toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+  }
+  .toast {
+    background: #4caf50;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-top: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInOut 4s forwards;
+  }
+  @keyframes fadeInOut {
+    0% {opacity: 0; transform: translateY(20px);}
+    10% {opacity: 1; transform: translateY(0);}
+    90% {opacity: 1; transform: translateY(0);}
+    100% {opacity: 0; transform: translateY(20px);}
+  }
