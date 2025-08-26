@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        .chat-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar với danh sách chat */
+        .chat-sidebar {
+            width: 360px;
+            background: white;
+            border-right: 1px solid #e4e6ea;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e4e6ea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #050505;
+        }
+
+        .search-container {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e4e6ea;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            background: #f0f2f5;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            background: #e4e6ea;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .chat-item:hover {
+            background-color: #f2f3f5;
+        }
+
+        .chat-item.active {
+            background-color: #e7f3ff;
+        }
+
+        .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            margin-right: 12px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .chat-info {
+            flex: 1;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: #050505;
+            margin-bottom: 2px;
+        }
+
+        .chat-preview {
+            font-size: 13px;
+            color: #65676b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-time {
+            font-size: 12px;
+            color: #65676b;
+        }
+
+        .online-indicator {
+            width: 14px;
+            height: 14px;
+            background: #42b883;
+            border: 2px solid white;
+            border-radius: 50%;
+            position: relative;
+            top: -40px;
+            left: 40px;
+        }
+
+        /* Khu vực chat chính */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            padding: 12px 20px;
+            border-bottom: 1px solid #e4e6ea;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .header-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #050505;
+        }
+
+        .header-status {
+            font-size: 12px;
+            color: #42b883;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: #f0f2f5;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1877f2;
+            font-size: 16px;
+        }
+
+        .action-btn:hover {
+            background: #e4e6ea;
+        }
+
+        /* Khu vực tin nhắn */
+        .messages-container {
+            flex: 1;
+            padding: 16px 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 8px;
+            align-items: flex-end;
+        }
+
+        .message.sent {
+            justify-content: flex-end;
+        }
+
+        .message.received {
+            justify-content: flex-start;
+        }
+
+        .message-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            margin: 0 8px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .message-content {
+            max-width: 60%;
+            padding: 8px 12px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.sent .message-content {
+            background: #1877f2;
+            color: white;
+        }
+
+        .message.received .message-content {
+            background: #e4e6ea;
+            color: #050505;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #65676b;
+            margin: 4px 12px 0;
+        }
+
+        /* Khu vực nhập tin nhắn */
+        .input-container {
+            padding: 16px 20px;
+            border-top: 1px solid #e4e6ea;
+            background: white;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f0f2f5;
+            border-radius: 20px;
+            padding: 8px;
+        }
+
+        .message-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 4px 12px;
+            font-size: 14px;
+            outline: none;
+            resize: none;
+            max-height: 80px;
+        }
+
+        .send-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #1877f2;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+        }
+
+        .send-btn:hover {
+            background: #166fe5;
+        }
+
+        .send-btn:disabled {
+            background: #e4e6ea;
+            color: #65676b;
+            cursor: not-allowed;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chat-sidebar {
+                width: 100%;
+                display: none;
+            }
+            
+            .chat-sidebar.mobile-show {
+                display: flex;
+            }
+            
+            .chat-main {
+                display: none;
+            }
+            
+            .chat-main.mobile-show {
+                display: flex;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Sidebar với danh sách chat -->
+        <div class="chat-sidebar" id="chatSidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Chats</h2>
+            </div>
+            
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Tìm kiếm trong Messenger">
+            </div>
+            
+            <div class="chat-list" id="chatList">
+                <div class="chat-item active" onclick="selectChat('Nguyễn Văn A', 'N')">
+                    <div class="avatar">N</div>
+                    <div class="online-indicator"></div>
+                    <div class="chat-info">
+                        <div class="chat-name">Nguyễn Văn A</div>
+                        <div class="chat-preview">Bạn: Cảm ơn bạn nhiều!</div>
+                    </div>
+                    <div class="chat-time">2 phút</div>
+                </div>
+                
+                <div class="chat-item" onclick="selectChat('Trần Thị B', 'T')">
+                    <div class="avatar" style="background: linear-gradient(45deg, #f093fb, #f5576c);">T</div>
+                    <div class="chat-info">
+                        <div class="chat-name">Trần Thị B</div>
+                        <div class="chat-preview">Hẹn gặp bạn vào chiều mai nhé</div>
+                    </div>
+                    <div class="chat-time">1 giờ</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Khu vực chat chính -->
+        <div class="chat-main mobile-show" id="chatMain">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <div class="header-avatar" id="headerAvatar">N</div>
+                    <div>
+                        <div class="header-name" id="headerName">Nguyễn Văn A</div>
+                        <div class="header-status">Đang hoạt động</div>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button class="action-btn">ℹ️</button>
+                </div>
+            </div>
+            
+            <div class="messages-container" id="messagesContainer">
+                <div class="message received">
+                    <div class="message-avatar">N</div>
+                    <div class="message-content">Chào bạn! Bạn có khỏe không?</div>
+                </div>
+                <div class="message-time" style="text-align: left; margin-left: 44px;">14:30</div>
+                
+                <div class="message sent">
+                    <div class="message-content">Chào bạn! Mình khỏe, cảm ơn bạn đã hỏi thăm</div>
+                </div>
+                <div class="message-time" style="text-align: right; margin-right: 12px;">14:32</div>
+                
+                <div class="message received">
+                    <div class="message-avatar">N</div>
+                    <div class="message-content">Tuyệt quá! Mình có một tin tức thú vị muốn chia sẻ với bạn</div>
+                </div>
+                <div class="message-time" style="text-align: left; margin-left: 44px;">14:35</div>
+                
+                <div class="message sent">
+                    <div class="message-content">Tin gì thế? Kể mình nghe đi!</div>
+                </div>
+                <div class="message-time" style="text-align: right; margin-right: 12px;">14:36</div>
+                
+                <div class="message received">
+                    <div class="message-avatar">N</div>
+                    <div class="message-content">Mình vừa được nhận vào công ty mới! 🎉</div>
+                </div>
+                <div class="message-time" style="text-align: left; margin-left: 44px;">14:38</div>
+                
+                <div class="message sent">
+                    <div class="message-content">Chúc mừng bạn! Đó là tin tuyệt vời đấy!</div>
+                </div>
+                <div class="message-time" style="text-align: right; margin-right: 12px;">14:39</div>
+                
+                <div class="message sent">
+                    <div class="message-content">Cảm ơn bạn nhiều!</div>
+                </div>
+                <div class="message-time" style="text-align: right; margin-right: 12px;">14:40</div>
+            </div>
+            
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea class="message-input" placeholder="Aa" rows="1" id="messageInput"></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentChat = {
+            name: 'Nguyễn Văn A',
+            avatar: 'N'
+        };
+
+        function selectChat(name, avatar) {
+            // Cập nhật active state
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Cập nhật header
+            document.getElementById('headerName').textContent = name;
+            document.getElementById('headerAvatar').textContent = avatar;
+            
+            // Cập nhật current chat
+            currentChat.name = name;
+            currentChat.avatar = avatar;
+            
+            // Clear messages và thêm tin nhắn mẫu
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.innerHTML = `
+                <div class="message received">
+                    <div class="message-avatar">${avatar}</div>
+                    <div class="message-content">Chào bạn!</div>
+                </div>
+                <div class="message-time" style="text-align: left; margin-left: 44px;">Vừa xong</div>
+            `;
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Mobile: hiện chat main, ẩn sidebar
+            if (window.innerWidth <= 768) {
+                document.getElementById('chatSidebar').classList.remove('mobile-show');
+                document.getElementById('chatMain').classList.add('mobile-show');
+            }
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const messageText = messageInput.value.trim();
+            
+            if (messageText === '') return;
+            
+            const messagesContainer = document.getElementById('messagesContainer');
+            const currentTime = new Date().toLocaleTimeString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Thêm tin nhắn mới
+            messagesContainer.innerHTML += `
+                <div class="message sent">
+                    <div class="message-content">${messageText}</div>
+                </div>
+                <div class="message-time" style="text-align: right; margin-right: 12px;">${currentTime}</div>
+            `;
+            
+            // Clear input
+            messageInput.value = '';
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Auto reply sau 2 giây
+            setTimeout(() => {
+                messagesContainer.innerHTML += `
+                    <div class="message received">
+                        <div class="message-avatar">${currentChat.avatar}</div>
+                        <div class="message-content">Cảm ơn bạn đã nhắn tin!</div>
+                    </div>
+                    <div class="message-time" style="text-align: left; margin-left: 44px;">${currentTime}</div>
+                `;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 2000);
+        }
+
+        // Enter để gửi tin nhắn
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Auto-resize textarea
+        document.getElementById('messageInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+        });
+
+        // Search functionality
+        document.querySelector('.search-input').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const chatItems = document.querySelectorAll('.chat-item');
+            
+            chatItems.forEach(item => {
+                const chatName = item.querySelector('.chat-name').textContent.toLowerCase();
+                if (chatName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Mobile back button
+        function goBackToSidebar() {
+            if (window.innerWidth <= 768) {
+                document.getElementById('chatMain').classList.remove('mobile-show');
+                document.getElementById('chatSidebar').classList.add('mobile-show');
+            }
+        }
+
+        // Responsive handling
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.getElementById('chatSidebar').classList.remove('mobile-show');
+                document.getElementById('chatMain').classList.add('mobile-show');
+            }
+        });
+
+        // Initial scroll to bottom
+        document.addEventListener('DOMContentLoaded', function() {
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        });
+    </script>
+</body>
+</html>

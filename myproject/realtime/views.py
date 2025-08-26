@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404,redirect
 from django.http import JsonResponse
 from home.models import Posts,PostLike,PostComment,User
+
 from .utils import send_notification
 from django.contrib.auth.decorators import login_required
 from .models import Notification
@@ -44,9 +45,6 @@ def like_post(request, post_id):
             "status": "liked",
             "likeCount": post.likeCount
         })
-
-
-
 
 
 @login_required
@@ -98,9 +96,6 @@ def add_comment(request, post_id):
         "commentCount": post.commentCount
     })
 
-
-
-
 @login_required(login_url='login')
 def add_friend(request, user_id):
     other_user = get_object_or_404(User, pk=user_id)
@@ -122,20 +117,6 @@ def add_friend(request, user_id):
 
     return redirect(next_url)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @login_required
 def mark_notification_read(request):
     notification_id = request.GET.get('id')
@@ -146,3 +127,9 @@ def mark_notification_read(request):
         return JsonResponse({'status': 'ok'})
     except Notification.DoesNotExist:
         return JsonResponse({'status': 'error'})
+
+
+
+@login_required
+def chat(request):
+    return render(request,'chat/chat.html')
