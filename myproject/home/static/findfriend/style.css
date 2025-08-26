@@ -50,7 +50,8 @@ body {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background-color: #1877f2;
+    /* background-color: #1877f2; */
+    background: linear-gradient(45deg, #4ecdc4, #44a08d);
     color: white;
     display: flex;
     align-items: center;
@@ -95,3 +96,57 @@ body {
     color: #65676b;
   }
   
+  .friend-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  /* Nút mặc định */
+  .friend-actions button {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+  }
+  
+  /* Thêm bạn */
+  .friend-actions .add-friend-btn {
+    background: #1877f2;  /* xanh giống facebook */
+    color: #fff;
+  }
+  
+  .friend-actions .add-friend-btn:hover {
+    background: #145dc0;
+  }
+  
+  /* Hủy lời mời */
+  .friend-actions .btn-warning {
+    background: #e3d7a8;
+    color: #333;
+  }
+  
+  .friend-actions .btn-warning:hover {
+    background: #e55252;
+  }
+  
+  /* Đồng ý */
+  .friend-actions .btn-success {
+    background: #4caf50;
+    color: #fff;
+  }
+  
+  .friend-actions .btn-success:hover {
+    background: #3d8b40;
+  }
+  
+  /* Từ chối / Hủy kết bạn */
+  .friend-actions .btn-danger {
+    background: #f44336;
+    color: #fff;
+  }
+  
+  .friend-actions .btn-danger:hover {
+    background: #d32f2f;
+  }

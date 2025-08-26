@@ -2,10 +2,9 @@ from django.shortcuts import render
 
 # Create your views here.
 # myapp/views.py
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404,redirect
 from django.http import JsonResponse
-from home.models import Posts,PostLike
-from home.models import PostComment
+from home.models import Posts,PostLike,PostComment,User
 from .utils import send_notification
 from django.contrib.auth.decorators import login_required
 from .models import Notification
@@ -100,6 +99,28 @@ def add_comment(request, post_id):
     })
 
 
+
+
+@login_required(login_url='login')
+def add_friend(request, user_id):
+    other_user = get_object_or_404(User, pk=user_id)
+
+    success = request.user.send_friend_request(other_user)
+
+    # Redirect về lại trang gốc
+    next_url = request.POST.get("next") or request.META.get("HTTP_REFERER", "/")
+
+    if success:
+        # Gọi hàm tiện ích gửi notification
+        send_notification(
+            user=other_user,
+            sender=request.user,
+            message=f"👥 {request.user.full_name} đã gửi cho bạn lời mời kết bạn.",
+            post=None,
+            comment=None
+        )
+
+    return redirect(next_url)
 
 
 

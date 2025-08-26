@@ -8,38 +8,45 @@
 <div class="container">
   <main class="main-feed">
     <form
-      method="post"
-      enctype="multipart/form-data"
-      action="{% url 'create_post' %}"
-    >
-      {% csrf_token %}
-      <div class="create-post">
-        <div class="post-input">
-          <div class="post-avatar">
-            {% if user.avatar %}
-            <img src="{{ user.avatar.url }}" alt="{{ user.full_name }}" />
-            {% else %} {{ user.full_name|slice:":1" }} {% endif %}
-          </div>
-          <div id="editor" contenteditable="true" placeholder="Bạn đang nghĩ gì?"
-          style="border:1px solid #ccc; padding:10px; min-height:100px;"></div>
-          <input type="hidden" name="content" id="hidden-content">
-        </div>
-        <div class="post-actions">
-          <div class="post-options">
-            <label for="image-upload" class="custom-file-upload">
-              📷 Chọn ảnh
-            </label>
-            <input
-              id="image-upload"
-              type="file"
-              name="media"
-              accept="image/*"
-            />
-          </div>
-          <button type="submit" class="post-btn">Đăng bài</button>
-        </div>
+  method="post"
+  enctype="multipart/form-data"
+  action="{% url 'create_post' %}"
+  id="post-form"
+>
+  {% csrf_token %}
+  <div class="create-post">
+    <div class="post-input">
+      <div class="post-avatar" style="width:55px;">
+        {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" alt="{{ user.full_name }}" />
+        {% else %}
+          {{ user.full_name|slice:":1" }}
+        {% endif %}
       </div>
-    </form>
+      <div 
+        id="editor" 
+        contenteditable="true" 
+        placeholder="Bạn đang nghĩ gì?"
+        style="border:1px solid #ccc; padding:10px; min-height:100px;"
+      ></div>
+      <!-- Hidden input để gửi text lên server -->
+      <input type="hidden" name="content" id="hidden-content">
+    </div>
+
+    <div class="post-actions">
+      <div class="post-options">
+        <label for="image-upload" class="custom-file-upload">📷 Chọn ảnh</label>
+        <input
+          id="image-upload"
+          type="file"
+          name="media"
+          accept="image/*"
+        />
+      </div>
+      <button type="submit" class="post-btn">Đăng bài</button>
+    </div>
+  </div>
+</form>
 
     {% for post in posts %}
     <article class="post">
@@ -54,7 +61,7 @@
     {% endif %}
 
     <div class="post-avatar">
-        <a href="{% url 'personal_with_id' post.user.id %}" style="text-decoration:none">
+        <a href="{% url 'personal_with_id' post.user.id %}" style="text-decoration:none;color:white">
             {% if post.user.avatar %}
                 <img src="{{ post.user.avatar.url }}" alt="{{ post.user.full_name }}" />
             {% else %} 
@@ -213,8 +220,8 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #667eea, #764ba2);
       display: flex;
+      background: linear-gradient(45deg, #4ecdc4, #44a08d);
       align-items: center;
       justify-content: center;
       color: white;

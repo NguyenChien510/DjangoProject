@@ -159,9 +159,29 @@ document.getElementById("image-upload").addEventListener("change", function(e) {
   });
 
 
-  const form = document.querySelector("form");
-  form.addEventListener("submit", function() {
-    // Lấy text (chỉ text, bỏ thẻ <img>)
-    document.getElementById("hidden-content").value = 
-        document.getElementById("editor").innerText.trim();
-  });
+//   const form = document.querySelector("form");
+//   form.addEventListener("submit", function() {
+//     // Lấy text (chỉ text, bỏ thẻ <img>)
+//     document.getElementById("hidden-content").value = 
+//         document.getElementById("editor").innerText.trim();
+//   });
+
+const form = document.getElementById("post-form");
+form.addEventListener("submit", function() {
+  const editor = document.getElementById("editor");
+
+  // Lấy toàn bộ HTML từ editor
+  let htmlContent = editor.innerHTML.trim();
+
+  // Tạo temp div để lọc ảnh nếu muốn chỉ lấy text
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = htmlContent;
+  tempDiv.querySelectorAll("img").forEach(img => img.remove());
+
+  let textContent = tempDiv.textContent.trim();
+
+  // Nếu không có text, gán rỗng để form vẫn submit
+  if (!textContent) textContent = "";
+
+  document.getElementById("hidden-content").value = textContent;
+});

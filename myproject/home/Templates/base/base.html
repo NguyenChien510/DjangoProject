@@ -60,7 +60,9 @@
                                         </a>
                                     {% endif %}
                             {% else %}
-                                📢 {{ notification.message }}
+                                <a href="{% url 'personal_with_id' notification.sender.id %}" style="text-decoration:none;">
+                                {{ notification.message }}
+                                </a>
                             {% endif %}
                                 {% comment %} <p style="font-size:0.8rem;position:relative;left:125px;">{{notification.created_at|timesince}} ago</p> {% endcomment %}
                             </div>
@@ -105,7 +107,9 @@
         // Thông báo chỉ là text
         html = `
             <div class="dropdown-item unread" data-id="${data.id}">
-                📢 ${data.message}
+                <a href="{% url 'personal_with_id' ${data.sender.id}" style="text-decoration:none;">
+                ${data.message}
+                </a>
             </div>`;
     }
 

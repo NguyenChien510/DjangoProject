@@ -147,19 +147,21 @@ def edit_profile(request):
         pass
     return redirect('personal')
 
+# @login_required(login_url='login')
+# def add_friend(request, user_id):
+#     other_user = get_object_or_404(User, pk=user_id)
+
+#     success = request.user.send_friend_request(other_user)
+#      # Lấy next từ form hoặc fallback về trang trước
+#     next_url = request.POST.get("next") or request.META.get("HTTP_REFERER", "/")
+    
+#     if not success:
+#         return redirect(next_url)
+#     return redirect(next_url)
+
+
 @login_required(login_url='login')
-def add_friend(request, user_id):
-    other_user = get_object_or_404(User, pk=user_id)
-
-    success = request.user.send_friend_request(other_user)
-    if not success:
-        # Nếu đã có request hoặc là bạn rồi → reload lại trang trước
-        return redirect(request.META.get('HTTP_REFERER', '/'))
-
-    return redirect('personal_with_id', user_id=other_user.id)
-
-@login_required(login_url='login')
-def accpet_request(request,user_id):
+def accept_request(request, user_id):
     other_user = get_object_or_404(User, pk=user_id)
 
     # Chỉ xử lý khi có lời mời kết bạn từ other_user → request.user
@@ -173,7 +175,10 @@ def accpet_request(request,user_id):
         friendship.status = 'accepted'
         friendship.save()
 
-    return redirect(request.META.get('HTTP_REFERER', '/'))
+    # Ưu tiên redirect về "next" trong form, fallback về referer
+    next_url = request.POST.get("next") or request.META.get("HTTP_REFERER", "/")
+    return redirect(next_url)
+
 
 
 @login_required(login_url='login')
@@ -183,7 +188,11 @@ def cancel_request(request, user_id):
         Q(user1=request.user, user2=other_user, status='pending') |
         Q(user1=other_user, user2=request.user, status='pending')
     ).delete()
-    return redirect('personal_with_id', user_id=other_user.id)
+
+    # Redirect về trang gốc (nếu có) hoặc về referer
+    next_url = request.POST.get("next") or request.META.get("HTTP_REFERER", "/")
+    return redirect(next_url)
+
 
 @login_required(login_url='login')
 def delete_friend(request, user_id):
@@ -192,8 +201,9 @@ def delete_friend(request, user_id):
         Q(user1=request.user, user2=other_user, status='accepted') |
         Q(user1=other_user, user2=request.user, status='accepted')
     ).delete()
-    return redirect('personal_with_id', user_id=other_user.id)
-
+    # Redirect về trang gốc (nếu có) hoặc về referer
+    next_url = request.POST.get("next") or request.META.get("HTTP_REFERER", "/")
+    return redirect(next_url)
 
 def friends_list_view(request):
     # Lấy các friendship đã được chấp nhận
@@ -268,28 +278,118 @@ def delete_comment(request, comment_id):
     })
     
 
-@login_required
+# @login_required
+# def findfriend(request):
+#     keyword = request.GET.get("q", "")
+#     user = request.user
+
+#     # lấy danh sách bạn bè hiện tại ngay từ đầu
+#     my_friends = set(f.id for f in user.get_friends())
+
+#     results = []
+#     if keyword:
+#         # tìm user theo tên (loại bỏ chính mình + loại bỏ bạn bè đã có)
+#         users = User.objects.filter(
+#             Q(full_name__icontains=keyword)
+#         ).exclude(id__in=my_friends | {user.id})
+
+#         # tính số bạn chung
+#         for u in users:
+#             u_friends = set(f.id for f in u.get_friends())
+#             mutual_count = len(my_friends & u_friends)
+#             results.append((u, mutual_count))
+
+#         # sắp xếp giảm dần theo mutual_count
+#         results.sort(key=lambda x: x[1], reverse=True)
+
+#     return render(request, "findfriend/findfriend.html", {"results": results, "keyword": keyword})
+
+
+
+# @login_required
+# def findfriend(request):
+#     keyword = request.GET.get("q", "")
+#     user = request.user
+    
+#     results = []
+#     if keyword:
+#         # tìm user theo tên (loại bỏ chính mình)
+#         users = User.objects.filter(
+#             Q(full_name__icontains=keyword)
+#         ).exclude(id=user.id)
+
+#         # danh sách bạn của current user
+#         my_friends = set([f.id for f in user.get_friends()])   # <-- sửa ở đây
+
+#         # tính số bạn chung
+#         for u in users:
+#             u_friends = set([f.id for f in u.get_friends()])   # <-- sửa ở đây
+#             mutual_count = len(my_friends & u_friends)
+#             results.append((u, mutual_count))
+
+#         # sắp xếp giảm dần theo mutual_count
+#         results.sort(key=lambda x: x[1], reverse=True)
+
+#     return render(request, "findfriend/findfriend.html", {"results": results, "keyword": keyword})
+
+@login_required(login_url='login')
 def findfriend(request):
     keyword = request.GET.get("q", "")
-    user = request.user
-    
+    current_user = request.user
+
     results = []
     if keyword:
-        # tìm user theo tên (loại bỏ chính mình)
+        # tìm user theo tên, bỏ bản thân
         users = User.objects.filter(
             Q(full_name__icontains=keyword)
-        ).exclude(id=user.id)
+        ).exclude(id=current_user.id)
 
-        # danh sách bạn của current user
-        my_friends = set([f.id for f in user.get_friends()])   # <-- sửa ở đây
+        # danh sách bạn của current_user
+        my_friendships = Friendship.objects.filter(
+            status="accepted"
+        ).filter(Q(user1=current_user) | Q(user2=current_user))
 
-        # tính số bạn chung
+        my_friends = set(
+            f.user2 if f.user1 == current_user else f.user1
+            for f in my_friendships
+        )
+
         for u in users:
-            u_friends = set([f.id for f in u.get_friends()])   # <-- sửa ở đây
-            mutual_count = len(my_friends & u_friends)
-            results.append((u, mutual_count))
+            # tính bạn chung
+            u_friendships = Friendship.objects.filter(
+                status="accepted"
+            ).filter(Q(user1=u) | Q(user2=u))
 
-        # sắp xếp giảm dần theo mutual_count
+            u_friends = set(
+                f.user2 if f.user1 == u else f.user1
+                for f in u_friendships
+            )
+
+            mutual_count = len(my_friends & u_friends)
+
+            # quan hệ giữa current_user và u
+            relationship = Friendship.objects.filter(
+                Q(user1=current_user, user2=u) | Q(user1=u, user2=current_user)
+            ).first()
+
+            if relationship:
+                friendship_status = relationship.status  # 'pending' hoặc 'accepted'
+                friendship_sender_id = relationship.user1.id
+            else:
+                friendship_status = None
+                friendship_sender_id = None
+
+            results.append((u, mutual_count, friendship_status, friendship_sender_id))
+
+        # sắp xếp theo số bạn chung giảm dần
         results.sort(key=lambda x: x[1], reverse=True)
 
-    return render(request, "findfriend/findfriend.html", {"results": results, "keyword": keyword})
+    return render(
+        request,
+        "findfriend/findfriend.html",
+        {
+            "results": results,
+            "keyword": keyword,
+            "current_user": current_user,
+        },
+    )

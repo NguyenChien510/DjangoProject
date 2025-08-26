@@ -7,9 +7,9 @@ from realtime.consumers import NotificationConsumer
 from .models import Notification
 
 
-def send_notification(user, message, post=None,comment=None):
+def send_notification(user, message,sender=None, post=None,comment=None):
     # Tạo noti
-    notification = Notification.objects.create(user=user, message=message, post=post,comment = comment)
+    notification = Notification.objects.create(user=user, message=message,sender=sender, post=post,comment = comment)
 
     layer = get_channel_layer()
     async_to_sync(layer.group_send)(

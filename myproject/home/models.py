@@ -2,6 +2,28 @@ from django import forms
 from django.db import models
 from pymysql import IntegrityError
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import BaseUserManager
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError("Người dùng phải có email")
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser phải có is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser phải có is_superuser=True.")
+
+        return self.create_user(email, password, **extra_fields)
 
 class User(AbstractUser):
     # Bỏ username, dùng email làm đăng nhập
@@ -22,6 +44,9 @@ class User(AbstractUser):
         null=True
     )
     created_at = models.DateTimeField(auto_now_add=True)       # Ngày tạo tài khoản
+    
+    # gắn custom manager
+    objects = CustomUserManager()
     
     def get_friends(self):
         friendships = Friendship.objects.filter(
@@ -152,8 +177,8 @@ class Friendship(models.Model):
     class Meta:
         unique_together = ('user1', 'user2')  # Tránh trùng cặp bạn bè
         
-    def save(self, *args, **kwargs):
-        # Đảm bảo luôn lưu theo thứ tự ID tăng dần
-        if self.user1_id > self.user2_id:
-            self.user1, self.user2 = self.user2, self.user1
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # Đảm bảo luôn lưu theo thứ tự ID tăng dần
+    #     if self.user1_id > self.user2_id:
+    #         self.user1, self.user2 = self.user2, self.user1
+    #     super().save(*args, **kwargs)
