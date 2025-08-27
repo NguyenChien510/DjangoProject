@@ -2,13 +2,12 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.utils import timezone
-from django.contrib.auth import get_user_model
-from asgiref.sync import sync_to_async
-from .utils import get_user_status  # dùng chung
+from channels.db import database_sync_to_async
 
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        """Kết nối WebSocket cho thông báo realtime"""
         if self.scope["user"].is_authenticated:
             self.group_name = f"user_{self.scope['user'].id}"
             await self.channel_layer.group_add(self.group_name, self.channel_name)
@@ -17,100 +16,71 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     async def disconnect(self, close_code):
-        if hasattr(self, 'group_name'):
+        """Ngắt kết nối"""
+        if hasattr(self, "group_name"):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def send_notification(self, event):
+        """Gửi thông báo xuống client"""
         await self.send(text_data=json.dumps(event))
-        
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = f"chat_{self.room_name}"
+        self.conv_id = self.scope['url_route']['kwargs']['conv_id']
+        self.group_name = f"chat_{self.conv_id}"
 
-        # Join room group
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-
-        user = self.scope["user"]
-        if user.is_authenticated:
-            await self.set_user_online(user)
-
-        await self.accept()
-
-        # Broadcast status update
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "status_message",
-                "status": get_user_status(user)
-            }
-        )
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()  # KHÔNG cập nhật online/offline ở đây
 
     async def disconnect(self, close_code):
-        user = self.scope["user"]
-        if user.is_authenticated:
-            await self.set_user_offline(user)
-
-            # Broadcast offline status
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "status_message",
-                    "status": get_user_status(user)
-                }
-            )
-
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        message = data['message']
-
+        message = data.get("message", "").strip()
         user = self.scope["user"]
-        sender_name = user.username if user.is_authenticated else "Ẩn danh"
 
-        # Broadcast tới group
+        if not user.is_authenticated or not message:
+            return
+
+        saved = await self.save_message(user_id=user.id, conv_id=self.conv_id, text=message)
+
         await self.channel_layer.group_send(
-            self.room_group_name,
+            self.group_name,
             {
                 "type": "chat_message",
-                "message": message,
-                "sender": sender_name
+                "message": saved["text"],
+                "sender_id": saved["sender_id"],
+                "sender_name": saved["sender_name"],
+                "time": saved["time"],
             }
         )
 
     async def chat_message(self, event):
-        message = event["message"]
-        sender = event["sender"]
-
         await self.send(text_data=json.dumps({
             "type": "chat_message",
-            "message": message,
-            "sender": sender,
-            "is_self": sender == self.scope["user"].username
+            "message": event["message"],
+            "sender_id": event["sender_id"],
+            "sender_name": event["sender_name"],
+            "time": event["time"],
+            "is_self": event["sender_id"] == getattr(self.scope["user"], "id", None),
         }))
 
-    async def status_message(self, event):
-        await self.send(text_data=json.dumps({
-            "type": "status_update",
-            "status": event["status"]
-        }))
+    @database_sync_to_async
+    def save_message(self, user_id, conv_id, text):
+        from home.models import Conversation, Message, User
+        conv = Conversation.objects.get(id=conv_id)
 
-    async def set_user_online(self, user):
-        user.is_online = True
-        user.last_seen = timezone.now()
-        await sync_to_async(user.save)()
+        # Chặn gửi nếu user không thuộc cuộc trò chuyện
+        if user_id not in [conv.user1_id, conv.user2_id]:
+            raise PermissionError("User không thuộc conversation này")
 
-    async def set_user_offline(self, user):
-        user.is_online = False
-        user.last_seen = timezone.now()
-        await sync_to_async(user.save)()
-
+        user = User.objects.get(id=user_id)
+        msg = Message.objects.create(conversation=conv, sender=user, text=text)
+        return {
+            "text": msg.text,
+            "sender_id": user.id,
+            "sender_name": getattr(user, "full_name", user.username),
+            "time": msg.created_at.strftime("%H:%M"),
+        }

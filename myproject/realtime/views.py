@@ -156,30 +156,26 @@ def chat_page(request):
 
     
 @login_required
-def get_messages(request, user_id):
-    User = get_user_model()
-
+def get_messages(request, conv_id):
     try:
-        other_user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        raise Http404("User không tồn tại")
+        conv = Conversation.objects.get(id=conv_id)
+    except Conversation.DoesNotExist:
+        raise Http404("Conversation không tồn tại")
 
-    conv = Conversation.objects.filter(
-        (models.Q(user1=request.user) & models.Q(user2=other_user)) |
-        (models.Q(user1=other_user) & models.Q(user2=request.user))
-    ).first()
-
-    if not conv:
-        return JsonResponse([], safe=False)
+    # check user có thuộc cuộc trò chuyện không
+    if request.user not in [conv.user1, conv.user2]:
+        return JsonResponse({"error": "Không có quyền xem"}, status=403)
 
     messages = conv.messages.select_related("sender")
 
     data = [
         {
             "id": m.id,
-            "sender": m.sender.full_name or m.sender.email,
+            "sender_id": m.sender_id,
+            "sender_name": m.sender.full_name,   # để hiện avatar/chữ cái
             "text": m.text,
-            "time": m.created_at.strftime("%H:%M")
+            "time": m.created_at.strftime("%H:%M"),
+            "is_self": m.sender_id == request.user.id
         }
         for m in messages
     ]

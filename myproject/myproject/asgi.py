@@ -1,10 +1,10 @@
 import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
 from django.contrib.staticfiles.handlers import ASGIStaticFilesHandler
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 import realtime.routing
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
 
 # Gói static handler cho HTTP trong dev mode
 from django.core.asgi import get_asgi_application
