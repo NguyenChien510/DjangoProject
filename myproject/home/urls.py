@@ -26,7 +26,11 @@ urlpatterns = [
     path('postdetail/<int:post_id>', views.profile_view, name='post_detail'),
     path('add-comment/<int:post_id>/', viewrealtime.add_comment, name='add_comment'),
     path('findfriend',views.findfriend,name='findfriend'),
-    path('chat',viewrealtime.chat,name='chat'),
+    path('chat',viewrealtime.chat_page,name='chat'),
+    path("chat/messages/<int:user_id>/", viewrealtime.get_messages, name="get_messages"),
+    path("chat/status/<int:user_id>/", viewrealtime.get_status, name="get_status"),
+    path("chat/search-users/", viewrealtime.search_users, name="search_users"),
+    path("chat/get-or-create-conversation/<int:user_id>/", viewrealtime.get_or_create_conversation, name="get_or_create_conversation"),
 ]
 
 if settings.DEBUG:

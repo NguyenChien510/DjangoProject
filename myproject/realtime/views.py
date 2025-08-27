@@ -3,13 +3,16 @@ from django.shortcuts import render
 # Create your views here.
 # myapp/views.py
 from django.shortcuts import get_object_or_404,redirect
-from django.http import JsonResponse
-from home.models import Posts,PostLike,PostComment,User
-
-from .utils import send_notification
+from django.http import Http404, JsonResponse
+from home.models import Posts,PostLike,PostComment,User,Conversation
+from .utils import get_user_status, send_notification
 from django.contrib.auth.decorators import login_required
 from .models import Notification
 from django.template.loader import render_to_string
+from django.db import models
+from django.db.models import Q
+from django.contrib.auth import get_user_model
+
 
 @login_required
 def like_post(request, post_id):
@@ -114,7 +117,6 @@ def add_friend(request, user_id):
             post=None,
             comment=None
         )
-
     return redirect(next_url)
 
 @login_required
@@ -130,6 +132,84 @@ def mark_notification_read(request):
 
 
 
+
 @login_required
-def chat(request):
-    return render(request,'chat/chat.html')
+def chat_page(request):
+    user = request.user
+    conversations = Conversation.objects.filter(
+        Q(user1=user) | Q(user2=user)
+    ).prefetch_related("messages")
+
+    conv_data = []
+    for conv in conversations:
+        other = conv.user2 if conv.user1 == user else conv.user1
+        conv_data.append({
+            "conversation": conv,
+            "other_user": other,
+            "status": get_user_status(other)
+        })
+
+    return render(request, "chat/chat.html", {
+        "conversations": conv_data,
+        "current_user_name": request.user.full_name
+    })
+
+    
+@login_required
+def get_messages(request, user_id):
+    User = get_user_model()
+
+    try:
+        other_user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        raise Http404("User không tồn tại")
+
+    conv = Conversation.objects.filter(
+        (models.Q(user1=request.user) & models.Q(user2=other_user)) |
+        (models.Q(user1=other_user) & models.Q(user2=request.user))
+    ).first()
+
+    if not conv:
+        return JsonResponse([], safe=False)
+
+    messages = conv.messages.select_related("sender")
+
+    data = [
+        {
+            "id": m.id,
+            "sender": m.sender.full_name or m.sender.email,
+            "text": m.text,
+            "time": m.created_at.strftime("%H:%M")
+        }
+        for m in messages
+    ]
+    return JsonResponse(data, safe=False)
+
+@login_required
+def get_status(request, user_id):
+    User = get_user_model()
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"status": "Không tìm thấy"}, status=404)
+
+    return JsonResponse({"status": get_user_status(user)})  # <-- Gọi hàm ở đây
+
+@login_required
+def search_users(request):
+    q = request.GET.get("q", "").strip()
+    if not q:
+        return JsonResponse([], safe=False)
+
+    users = User.objects.filter(full_name__icontains=q).exclude(id=request.user.id)[:10]
+    data = [{"id": u.id, "name": u.full_name} for u in users]
+    return JsonResponse(data, safe=False)
+
+@login_required
+def get_or_create_conversation(request, user_id):
+    other = User.objects.get(id=user_id)
+    conv = Conversation.objects.filter(participants=request.user).filter(participants=other).first()
+    if not conv:
+        conv = Conversation.objects.create()
+        conv.participants.add(request.user, other)
+    return JsonResponse({"id": conv.id})

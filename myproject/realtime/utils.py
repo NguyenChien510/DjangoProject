@@ -1,13 +1,11 @@
 # myapp/utils.py
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from home.models import Posts
-
-from realtime.consumers import NotificationConsumer
-from .models import Notification
+from django.utils import timezone
 
 
 def send_notification(user, message,sender=None, post=None,comment=None):
+    from .models import Notification
     # Tạo noti
     notification = Notification.objects.create(user=user, message=message,sender=sender, post=post,comment = comment)
 
@@ -23,3 +21,26 @@ def send_notification(user, message,sender=None, post=None,comment=None):
             "comment_id": notification.comment.id if notification.comment else None,
         }
     )
+    
+
+def get_user_status(user):
+    """Trả về chuỗi trạng thái của user"""
+    if getattr(user, "is_online", False):
+        return "🟢 Đang hoạt động"
+
+    if not getattr(user, "last_seen", None):
+        return "Chưa từng hoạt động"
+
+    delta = timezone.now() - user.last_seen
+    minutes = int(delta.total_seconds() // 60)
+    hours = int(delta.total_seconds() // 3600)
+    days = delta.days
+
+    if minutes < 1:
+        return "Vừa mới hoạt động"
+    elif minutes < 60:
+        return f"Hoạt động {minutes} phút trước"
+    elif hours < 24:
+        return f"Hoạt động {hours} giờ trước"
+    else:
+        return f"Hoạt động {days} ngày trước"

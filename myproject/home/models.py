@@ -3,6 +3,11 @@ from django.db import models
 from pymysql import IntegrityError
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
+from django.utils import timezone
+from datetime import timedelta
+
+
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -26,6 +31,8 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 class User(AbstractUser):
+    is_online = models.BooleanField(default=False)
+    last_seen = models.DateTimeField(null=True, blank=True)
     # Bỏ username, dùng email làm đăng nhập
     username = None  # bỏ field username mặc định
     email = models.EmailField(unique=True)
@@ -90,6 +97,30 @@ class User(AbstractUser):
             return False
     
 
+class Conversation(models.Model):
+    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="conversations_started")
+    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="conversations_received")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user1', 'user2')  # 1 cặp user chỉ có 1 cuộc trò chuyện
+
+    def get_other_user(self, user):
+        """Lấy ra user còn lại trong cuộc trò chuyện"""
+        return self.user2 if self.user1 == user else self.user1
+
+
+class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, related_name="messages", on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+
+
 class Posts(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField(blank=True, null=True)
@@ -105,8 +136,7 @@ class PostLike(models.Model):
 
     class Meta:
         unique_together = ('post', 'user')  # 1 người chỉ like 1 lần
-
-        
+    
 class PostComment(models.Model):
     post = models.ForeignKey('Posts', on_delete=models.CASCADE, related_name='comments')  # Comment thuộc bài viết nào
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')    # Ai comment
@@ -126,16 +156,12 @@ class CommentLike(models.Model):
 
     class Meta:
         unique_together = ('comment', 'user')  # đảm bảo 1 user chỉ like 1 lần    
-
-        
     
-
 class PostForm(forms.ModelForm):
     class Meta:
         model = Posts
         fields = ['content','media']
         
-
 class ProfileEditForm(forms.ModelForm):
     date_of_birth = forms.DateField(
         required=False,
@@ -159,8 +185,7 @@ class ProfileEditForm(forms.ModelForm):
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Giới thiệu về bạn'}),
             'avatar': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
         }  
-
-    
+  
 class Friendship(models.Model):
     user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friendships_initiated')
     user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friendships_received')

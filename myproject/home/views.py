@@ -3,16 +3,18 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.template.loader import render_to_string
-from .models import Friendship, PostComment, PostForm, PostLike, ProfileEditForm, User
-from .models import Posts
+from .models import Conversation, Friendship, PostComment, PostForm, PostLike, ProfileEditForm, User,Posts,Message
 from django.contrib.auth import logout,login as auth_login
 from django.db.models import Q,Count
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def logout_view(request):
-    logout(request)  # Xóa toàn bộ session + đăng xuất user
-    return redirect('login')  # Chuyển về trang login
+    if request.user.is_authenticated:
+        request.user.is_online = False
+        request.user.save()
+    logout(request)
+    return redirect("login")
 
 def login(request):
     if request.method == 'POST':
@@ -147,18 +149,6 @@ def edit_profile(request):
         pass
     return redirect('personal')
 
-# @login_required(login_url='login')
-# def add_friend(request, user_id):
-#     other_user = get_object_or_404(User, pk=user_id)
-
-#     success = request.user.send_friend_request(other_user)
-#      # Lấy next từ form hoặc fallback về trang trước
-#     next_url = request.POST.get("next") or request.META.get("HTTP_REFERER", "/")
-    
-#     if not success:
-#         return redirect(next_url)
-#     return redirect(next_url)
-
 
 @login_required(login_url='login')
 def accept_request(request, user_id):
@@ -177,6 +167,21 @@ def accept_request(request, user_id):
 
     # Ưu tiên redirect về "next" trong form, fallback về referer
     next_url = request.POST.get("next") or request.META.get("HTTP_REFERER", "/")
+    
+    # Sắp xếp user theo id để tránh trùng lặp (A-B và B-A)
+    if request.user.id < other_user.id:
+        user1, user2 = request.user, other_user
+    else:
+        user1, user2 = other_user, request.user
+    conv, created = Conversation.objects.get_or_create(
+        user1=user1,
+        user2=user2
+    )
+    if created:
+        Message.objects.create(
+        conversation=conv,
+        sender=request.user,
+    )
     return redirect(next_url)
 
 
