@@ -207,9 +207,19 @@ def search_users(request):
 
 @login_required
 def get_or_create_conversation(request, user_id):
-    other = User.objects.get(id=user_id)
-    conv = Conversation.objects.filter(participants=request.user).filter(participants=other).first()
+    try:
+        other = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
+
+    # Tìm conversation giữa 2 user (user1-user2 hoặc user2-user1)
+    conv = Conversation.objects.filter(
+        (Q(user1=request.user) & Q(user2=other)) |
+        (Q(user1=other) & Q(user2=request.user))
+    ).first()
+
+    # Nếu chưa có thì tạo mới
     if not conv:
-        conv = Conversation.objects.create()
-        conv.participants.add(request.user, other)
+        conv = Conversation.objects.create(user1=request.user, user2=other)
+
     return JsonResponse({"id": conv.id})

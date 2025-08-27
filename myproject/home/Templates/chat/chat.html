@@ -26,7 +26,10 @@
             <div class="chat-list" id="chatList">
                 {% for item in conversations %}
                     {% with conv=item.conversation other=item.other_user %}
-                    <div class="chat-item" onclick="selectChat('{{ other.id }}', '{{ other.full_name }}')">
+                    <div class="chat-item" 
+                         data-user-id="{{ other.id }}" 
+                         data-conv-id="{{ conv.id }}" 
+                         onclick="selectChat('{{ other.id }}', '{{ other.full_name }}', '{{ conv.id }}')">
                         <div class="avatar">{{ other.full_name|slice:":1" }}</div>
                         <div class="chat-info">
                             <div class="chat-name">{{ other.full_name }}</div>
@@ -37,12 +40,12 @@
                                     (Chưa có tin nhắn)
                                 {% endif %}
                             </div>
-                            
                         </div>
                     </div>
                     {% endwith %}
                 {% endfor %}
             </div>
+            
             
             
         </div>

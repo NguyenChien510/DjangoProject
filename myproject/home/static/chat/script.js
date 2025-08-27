@@ -1,7 +1,7 @@
 const CURRENT_USER_NAME = "{{ current_user_name }}";
-let currentUserId = null;          
-let currentConversationId = null;   
-let chatSocket = null;              
+let currentUserId = null;
+let currentConversationId = null;
+let chatSocket = null;
 
 // ======================
 // Chọn chat
@@ -14,10 +14,12 @@ function selectChat(otherId, otherName, convId) {
     document.getElementById("headerName").textContent = otherName;
     document.getElementById("headerAvatar").textContent = otherName.charAt(0);
     document.querySelector('.header-status').textContent = 'Đang tải...';
+
     // Clear tin nhắn cũ
     const container = document.getElementById("messagesContainer");
     container.innerHTML = "<p>Đang tải tin nhắn...</p>";
 
+    // Load trạng thái người dùng
     fetch(`/chat/status/${otherId}/`)
         .then(res => res.json())
         .then(data => {
@@ -27,6 +29,7 @@ function selectChat(otherId, otherName, convId) {
             console.error("Error loading status:", err);
             document.querySelector('.header-status').textContent = 'Offline';
         });
+
     // Load tin nhắn cũ
     fetch(`/chat/messages/${otherId}/`)
         .then(res => res.json())
@@ -41,7 +44,7 @@ function selectChat(otherId, otherName, convId) {
             container.innerHTML = "<p>Lỗi khi tải tin nhắn</p>";
         });
 
-    // Tạo WebSocket chat mới cho conversation
+    // Tạo WebSocket chat mới
     if (chatSocket) chatSocket.close();
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     chatSocket = new WebSocket(`${protocol}://${window.location.host}/ws/chat/conversation_${convId}/`);
@@ -137,35 +140,49 @@ searchInput.addEventListener('input', function() {
                     <div class="avatar">${user.name.charAt(0)}</div>
                     <div class="name">${user.name}</div>
                 `;
-                item.onclick = () => openOrCreateConversation(user.id, user.name);
+                item.onclick = () => openOrSelectConversation(user.id, user.name);
                 searchResults.appendChild(item);
             });
         });
 });
 
 // ======================
-// Mở hoặc tạo conversation
+// Mở hoặc chọn conversation
 // ======================
-function openOrCreateConversation(userId, userName) {
+function openOrSelectConversation(userId, userName) {
+    // Kiểm tra xem conversation đã có trong UI chưa
+    const existingItem = Array.from(chatList.children).find(
+        item => item.dataset.userId == userId
+    );
+
+    if (existingItem) {
+        const convId = existingItem.dataset.convId;
+        selectChat(userId, userName, convId);
+        searchResults.innerHTML = "";
+        searchInput.value = "";
+        return;
+    }
+
+    // Nếu chưa có, gọi API tạo hoặc lấy conversation
     fetch(`/chat/get-or-create-conversation/${userId}/`)
         .then(res => res.json())
         .then(data => {
             const convId = data.id;
 
-            if (!document.querySelector(`.chat-item[data-id='${userId}']`)) {
-                const newItem = document.createElement("div");
-                newItem.className = "chat-item";
-                newItem.dataset.id = userId;
-                newItem.onclick = () => selectChat(userId, userName, convId);
-                newItem.innerHTML = `
-                    <div class="avatar">${userName.charAt(0)}</div>
-                    <div class="chat-info">
-                        <div class="chat-name">${userName}</div>
-                        <div class="chat-preview">(Chưa có tin nhắn)</div>
-                    </div>
-                `;
-                chatList.prepend(newItem);
-            }
+            // Tạo UI mới
+            const newItem = document.createElement("div");
+            newItem.className = "chat-item";
+            newItem.dataset.userId = userId;
+            newItem.dataset.convId = convId;
+            newItem.onclick = () => selectChat(userId, userName, convId);
+            newItem.innerHTML = `
+                <div class="avatar">${userName.charAt(0)}</div>
+                <div class="chat-info">
+                    <div class="chat-name">${userName}</div>
+                    <div class="chat-preview">(Chưa có tin nhắn)</div>
+                </div>
+            `;
+            chatList.prepend(newItem);
 
             selectChat(userId, userName, convId);
             searchResults.innerHTML = "";
