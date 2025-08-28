@@ -3,8 +3,6 @@ from django.db import models
 from pymysql import IntegrityError
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
-from django.utils import timezone
-from datetime import timedelta
 
 
 
@@ -40,17 +38,17 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []  # Không cần thêm trường bắt buộc nào ngoài email
     
-    full_name = models.CharField(max_length=100)              # Họ tên
-    bio = models.TextField(blank=True, null=True)              # Giới thiệu
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)  # Ảnh đại diện
-    date_of_birth = models.DateField(blank=True, null=True)    # Ngày sinh
+    full_name = models.CharField(max_length=100)              
+    bio = models.TextField(blank=True, null=True)              
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)  
+    date_of_birth = models.DateField(blank=True, null=True)    
     gender = models.CharField(
         max_length=10,
         choices=[('male', 'Nam'), ('female', 'Nữ'), ('other', 'Khác')],
         blank=True,
         null=True
     )
-    created_at = models.DateTimeField(auto_now_add=True)       # Ngày tạo tài khoản
+    created_at = models.DateTimeField(auto_now_add=True)       
     
     # gắn custom manager
     objects = CustomUserManager()

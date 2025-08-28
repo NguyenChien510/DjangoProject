@@ -13,8 +13,12 @@
         <div class="chat-sidebar" id="chatSidebar">
             <div class="sidebar-header">
                 <h2 class="sidebar-title">
-                    <a href="{% url 'home' %}" style="text-decoration: none; color: inherit; margin-right: 8px;">🏠</a>
-                    Chats
+                    <a href="{% url 'home' %}" style="text-decoration: none; color: inherit; margin-right: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </a>
+                    Messenger
                 </h2>
             </div>
             
@@ -29,16 +33,34 @@
                     <div class="chat-item" 
                          data-user-id="{{ other.id }}" 
                          data-conv-id="{{ conv.id }}" 
-                         onclick="selectChat('{{ other.id }}', '{{ other.full_name }}', '{{ conv.id }}')">
-                        <div class="avatar">{{ other.full_name|slice:":1" }}</div>
+                         onclick="selectChat(
+                            '{{ other.id }}', 
+                            '{{ other.full_name }}' ,
+                            '{{ conv.id }}',
+                            '{% if other.avatar %}{{ other.avatar.url }}{% else %}null{% endif %}')">
+                        <div class="avatar">
+                            {% if other.avatar %}
+                                <img src="{{ other.avatar.url }}" alt="avatar">
+                            {% else %}
+                                {{ other.full_name|slice:":1"|upper }}
+                            {% endif %}
+                        </div>
+                        
                         <div class="chat-info">
                             <div class="chat-name">{{ other.full_name }}</div>
+                            <div class="chat-bottom">
                             <div class="chat-preview">
                                 {% if conv.messages.last %}
                                     {{ conv.messages.last.text|truncatechars:20 }}
                                 {% else %}
                                     (Chưa có tin nhắn)
                                 {% endif %}
+                            </div>
+                            <div class="chat-time">
+                                {% if conv.messages.last %}
+                                    {{conv.messages.last.created_at|date:"H:i"}}
+                                {% endif %}
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -54,10 +76,10 @@
         <div class="chat-main mobile-show" id="chatMain">
             <div class="chat-header">
                 <div class="chat-header-info">
-                    <div class="header-avatar" id="headerAvatar">N</div>
+                    <div class="header-avatar" id="headerAvatar"></div>
                     <div>
-                        <div class="header-name" id="headerName">Nguyễn Văn A</div>
-                        <div class="header-status">Đang hoạt động</div>
+                        <div class="header-name" id="headerName"></div>
+                        <div class="header-status"></div>
                     </div>
                 </div>
                 <div class="chat-actions">

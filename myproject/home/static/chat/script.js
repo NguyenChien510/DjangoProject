@@ -4,13 +4,27 @@ let currentUserId = null;
 let currentConversationId = null;
 let chatSocket = null;
 
-function selectChat(otherId, otherName, convId) {
+function selectChat(otherId, otherName, convId,otherAvatarUrl = null) {
     currentUserId = otherId;
     currentConversationId = convId;
 
     document.getElementById("headerName").textContent = otherName;
-    document.getElementById("headerAvatar").textContent = otherName.charAt(0);
     document.querySelector('.header-status').textContent = 'Đang tải...';
+    
+    const avatarDiv = document.getElementById("headerAvatar");
+    avatarDiv.innerHTML = ""; // xóa nội dung cũ
+    if (otherAvatarUrl&& otherAvatarUrl !== "null") {
+        const img = document.createElement("img");
+        img.src = otherAvatarUrl;
+        img.alt = otherName;
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
+        img.style.borderRadius = "50%";
+        avatarDiv.appendChild(img);
+    } else {
+        avatarDiv.textContent = otherName.charAt(0).toUpperCase();
+    }
 
     const container = document.getElementById("messagesContainer");
     container.innerHTML = "<p>Đang tải tin nhắn...</p>";
@@ -40,7 +54,7 @@ function selectChat(otherId, otherName, convId) {
         .then(data => {
             container.innerHTML = "";
             data.forEach(m => {
-                addMessage(m.text, m.sender_name,   m.is_self , m.time);
+                addMessage(m.text, m.sender_name,   m.is_self , m.time,m.sender_avatar);
             });
         })
         .catch(err => {
@@ -69,12 +83,22 @@ function selectChat(otherId, otherName, convId) {
     };
 }
 
-function addMessage(text, senderName, isSelf = false, time = null) {
+function addMessage(text, senderName, isSelf = false, time = null,senderAvatarUrl = null) {
     const messagesContainer = document.getElementById('messagesContainer');
     const messageTime = time || new Date().toLocaleTimeString('vi-VN', {
         hour: '2-digit',
         minute: '2-digit'
     });
+
+    let avatarHtml = "";
+    if (!isSelf) {
+        if (senderAvatarUrl && senderAvatarUrl !== "null") {
+            avatarHtml = `<img src="${senderAvatarUrl}" alt="${senderName}" 
+                               style="width:32px;height:32px;border-radius:50%;object-fit:cover;">`;
+        } else {
+            avatarHtml = senderName.charAt(0).toUpperCase();
+        }
+    }
 
     const html = isSelf ? `
         <div class="message sent">
@@ -83,7 +107,7 @@ function addMessage(text, senderName, isSelf = false, time = null) {
         <div class="message-time" style="text-align: right; margin-right: 12px;">${messageTime}</div>
     ` : `
         <div class="message received">
-            <div class="message-avatar">${senderName.charAt(0)}</div>
+            <div class="message-avatar">${avatarHtml}</div>
             <div class="message-content">${text}</div>
         </div>
         <div class="message-time" style="text-align: left; margin-left: 44px;">${messageTime}</div>

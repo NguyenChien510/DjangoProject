@@ -175,7 +175,8 @@ def get_messages(request, conv_id):
             "sender_name": m.sender.full_name,   # để hiện avatar/chữ cái
             "text": m.text,
             "time": m.created_at.strftime("%H:%M"),
-            "is_self": m.sender_id == request.user.id
+            "is_self": m.sender_id == request.user.id,
+            "sender_avatar": m.sender.avatar.url if m.sender.avatar else None,
         }
         for m in messages
     ]
