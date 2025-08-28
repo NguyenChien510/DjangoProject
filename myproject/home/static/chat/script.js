@@ -1,5 +1,6 @@
 const CURRENT_USER_NAME = "{{ request.user.full_name|escapejs }}";
 const CURRENT_USER_ID = parseInt("{{ request.user.id }}", 10);
+const CURRENT_USER_AVATAR = "{{ request.user.avatar.url|default_if_none:'null' }}";
 let currentUserId = null;
 let currentConversationId = null;
 let chatSocket = null;
@@ -74,7 +75,8 @@ function selectChat(otherId, otherName, convId,otherAvatarUrl = null) {
                 data.message,
                 data.sender_name,
                 data.is_self ?? (data.sender_id === CURRENT_USER_ID),
-                data.time);
+                data.time,
+                data.avatar);
         }
     };
 
@@ -121,7 +123,7 @@ function sendMessage() {
     const messageText = messageInput.value.trim();
     if (!chatSocket || !messageText) return;
 
-    chatSocket.send(JSON.stringify({ message: messageText }));
+    chatSocket.send(JSON.stringify({ message: messageText ,avatar: CURRENT_USER_AVATAR}));
     messageInput.value = '';
     messageInput.style.height = "auto";
 }

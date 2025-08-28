@@ -45,7 +45,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         saved = await self.save_message(user_id=user.id, conv_id=self.conv_id, text=message)
-
+    
+            # Lấy avatar URL trong async context
+        avatar_url = await database_sync_to_async(
+        lambda: user.avatar.url if user.avatar else None
+        )()
+    
         await self.channel_layer.group_send(
             self.group_name,
             {
@@ -54,10 +59,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "sender_id": saved["sender_id"],
                 "sender_name": saved["sender_name"],
                 "time": saved["time"],
+                "avatar": avatar_url
             }
         )
 
     async def chat_message(self, event):
+        
         await self.send(text_data=json.dumps({
             "type": "chat_message",
             "message": event["message"],
@@ -65,6 +72,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "sender_name": event["sender_name"],
             "time": event["time"],
             "is_self": event["sender_id"] == getattr(self.scope["user"], "id", None),
+            "avatar": event.get("avatar"), 
         }))
 
     @database_sync_to_async
