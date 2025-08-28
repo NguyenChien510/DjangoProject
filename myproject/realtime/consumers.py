@@ -59,7 +59,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "sender_id": saved["sender_id"],
                 "sender_name": saved["sender_name"],
                 "time": saved["time"],
-                "avatar": avatar_url
+                "avatar": avatar_url,
             }
         )
 
