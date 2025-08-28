@@ -51,6 +51,11 @@
                             <div class="chat-bottom">
                             <div class="chat-preview">
                                 {% if conv.messages.last %}
+                                    {% if conv.messages.last.sender_id == request.user.id %}
+                                        <span class="sender-label">Bạn:</span>
+                                    {% comment %} {% else %}
+                                        <strong>{{ other.full_name }}:</strong> {% endcomment %}
+                                {% endif %}
                                     {{ conv.messages.last.text|truncatechars:20 }}
                                 {% else %}
                                     (Chưa có tin nhắn)

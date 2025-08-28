@@ -182,6 +182,10 @@ body {
     font-size: 16px;
     color: #050505;
 }
+.sender-label {
+    font-weight: 500;   /* chữ đậm */
+    color: #333;        /* màu chữ */
+}
 
 .header-status {
     font-size: 12px;
