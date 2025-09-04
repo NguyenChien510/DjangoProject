@@ -178,31 +178,39 @@ searchInput.addEventListener("input", function () {
     }
 
     fetch(`/chat/search-users/?q=${encodeURIComponent(keyword)}`)
-        .then((res) => res.json())
-        .then((users) => {
-            searchResults.innerHTML = "";
-            users.forEach((user) => {
-                const item = document.createElement("div");
-                item.className = "search-item";
-                item.innerHTML = `
-                    <div class="avatar">${user.name.charAt(0)}</div>
-                    <div class="name">${user.name}</div>
-                `;
-                item.onclick = () => openOrSelectConversation(user.id, user.name);
-                searchResults.appendChild(item);
-            });
+    .then((res) => res.json())
+    .then((users) => {
+        searchResults.innerHTML = "";
+        users.forEach((user) => {
+            const item = document.createElement("div");
+            item.className = "search-item";
+
+            const avatarHtml = user.avatar
+                ? `<img src="${user.avatar}" alt="${user.name}" 
+                        style="width:32px;height:32px;border-radius:50%;object-fit:cover;">`
+                : user.name.charAt(0).toUpperCase();
+
+            item.innerHTML = `
+                <div class="avatar">${avatarHtml}</div>
+                <div class="name">${user.name}</div>
+            `;
+
+            item.onclick = () => openOrSelectConversation(user.id, user.name, user.avatar);
+            searchResults.appendChild(item);
         });
+    });
+
 });
 
 // ====================== Open or create conversation ======================
-function openOrSelectConversation(userId, userName) {
+function openOrSelectConversation(userId, userName , userAvatar=null) {
     const existingItem = Array.from(chatList.children).find(
         (item) => parseInt(item.dataset.userId, 10) === userId
     );
 
     if (existingItem) {
         const convId = parseInt(existingItem.dataset.convId, 10);
-        selectChat(userId, userName, convId);
+        selectChat(userId, userName, convId,userAvatar);
     } else {
         fetch(`/chat/get-or-create-conversation/${userId}/`)
             .then((res) => res.json())
@@ -212,9 +220,15 @@ function openOrSelectConversation(userId, userName) {
                 newItem.className = "chat-item";
                 newItem.dataset.userId = userId;
                 newItem.dataset.convId = convId;
-                newItem.onclick = () => selectChat(userId, userName, convId);
+                newItem.onclick = () => selectChat(userId, userName, convId,userAvatar);
+
+                const avatarHtml = userAvatar
+                    ? `<img src="${userAvatar}" alt="${userName}" 
+                           style="width:40px;height:40px;border-radius:50%;object-fit:cover;">`
+                    : userName.charAt(0).toUpperCase();
+
                 newItem.innerHTML = `
-                    <div class="avatar">${userName.charAt(0)}</div>
+                    <div class="avatar">${avatarHtml}</div>
                     <div class="chat-info">
                         <div class="chat-name">${userName}</div>
                         <div class="chat-bottom">

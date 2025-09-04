@@ -200,7 +200,13 @@ def search_users(request):
         return JsonResponse([], safe=False)
 
     users = User.objects.filter(full_name__icontains=q).exclude(id=request.user.id)[:10]
-    data = [{"id": u.id, "name": u.full_name} for u in users]
+    data = []
+    for u in users:
+        data.append({
+            "id": u.id,
+            "name": u.full_name,
+            "avatar": u.avatar.url if getattr(u, "avatar", None) else None,
+        })
     return JsonResponse(data, safe=False)
 
 @login_required
