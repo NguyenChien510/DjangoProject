@@ -1,113 +1,135 @@
+// ====================== Constants ======================
 const CURRENT_USER_NAME = "{{ request.user.full_name|escapejs }}";
-const CURRENT_USER_ID = parseInt("{{ request.user.id }}", 10);
 const CURRENT_USER_AVATAR = "{{ request.user.avatar.url|default_if_none:'null' }}";
-let currentUserId = null;
-let currentConversationId = null;
+
+let currentOtherUserId = null;       // id của người đang chat cùng
+let currentConversationId = null;    // id cuộc trò chuyện hiện tại
 let chatSocket = null;
 
-function selectChat(otherId, otherName, convId,otherAvatarUrl = null) {
-    currentUserId = otherId;
-    currentConversationId = convId;
+const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+const chatList = document.getElementById("chatList");
+const searchInput = document.querySelector(".search-input");
+const searchResults = document.querySelector(".search-results");
+const messageInput = document.getElementById("messageInput");
 
+
+
+// ====================== Chọn 1 cuộc trò chuyện ======================
+function selectChat(otherId, otherName, convId, otherAvatarUrl = null) {
+    currentOtherUserId = otherId;
+    currentConversationId = parseInt(convId, 10);
+
+    // header
     document.getElementById("headerName").textContent = otherName;
-    document.querySelector('.header-status').textContent = 'Đang tải...';
-    
-    const avatarDiv = document.getElementById("headerAvatar");
-    avatarDiv.innerHTML = ""; // xóa nội dung cũ
-    if (otherAvatarUrl&& otherAvatarUrl !== "null") {
-        const img = document.createElement("img");
-        img.src = otherAvatarUrl;
-        img.alt = otherName;
-        img.style.width = "100%";
-        img.style.height = "100%";
-        img.style.objectFit = "cover";
-        img.style.borderRadius = "50%";
-        avatarDiv.appendChild(img);
-    } else {
-        avatarDiv.textContent = otherName.charAt(0).toUpperCase();
-    }
+    document.querySelector(".header-status").textContent = "Đang tải...";
+    renderHeaderAvatar(otherName, otherAvatarUrl);
 
+    // container
     const container = document.getElementById("messagesContainer");
     container.innerHTML = "<p>Đang tải tin nhắn...</p>";
 
-        // Load trạng thái ban đầu
-        fetch(`/chat/status/${otherId}/`)
-        .then(res => res.json())
-        .then(data => {
-            document.querySelector('.header-status').textContent = data.status;
+    // load trạng thái
+    fetchStatus(otherId);
+    if (window.statusInterval) clearInterval(window.statusInterval);
+    window.statusInterval = setInterval(() => fetchStatus(otherId), 15000);
+
+    // load tin nhắn
+    fetch(`/chat/messages/${currentConversationId}/`)
+        .then((res) => res.json())
+        .then((messages) => {
+            container.innerHTML = "";
+            messages.forEach((m) => {
+                addMessage(m.text, m.sender_name, m.is_self, m.time, m.sender_avatar);
+            });
         })
         .catch(() => {
-            document.querySelector('.header-status').textContent = "Không lấy được trạng thái";
-        });
-
-    // Nếu muốn auto update status mỗi 15s
-    if (window.statusInterval) clearInterval(window.statusInterval);
-    window.statusInterval = setInterval(() => {
-        fetch(`/chat/status/${otherId}/`)
-            .then(res => res.json())
-            .then(data => {
-                document.querySelector('.header-status').textContent = data.status;
-            });
-    }, 15000);
-    // Load tin nhắn cũ
-    fetch(`/chat/messages/${convId}/`)
-        .then(res => res.json())
-        .then(data => {
-            container.innerHTML = "";
-            data.forEach(m => {
-                addMessage(m.text, m.sender_name,   m.is_self , m.time,m.sender_avatar);
-            });
-        })
-        .catch(err => {
-            console.error("Error loading messages:", err);
             container.innerHTML = "<p>Lỗi khi tải tin nhắn</p>";
         });
 
-    // WebSocket
+    // WebSocket cho cuộc trò chuyện
     if (chatSocket) chatSocket.close();
-    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-    chatSocket = new WebSocket(`${protocol}://${window.location.host}/ws/chat/${convId}/`);
+    chatSocket = new WebSocket(
+        `${protocol}://${window.location.host}/ws/chat/${currentConversationId}/`
+    );
 
-    chatSocket.onmessage = function(e) {
+    chatSocket.onmessage = (e) => {
         const data = JSON.parse(e.data);
         if (data.type === "chat_message") {
-            addMessage( 
+            addMessage(
                 data.message,
                 data.sender_name,
-                data.is_self ?? (data.sender_id === CURRENT_USER_ID),
+                data.is_self ?? data.sender_id === CURRENT_USER_ID,
                 data.time,
-                data.avatar);
+                data.avatar
+            );
         }
     };
 
-    chatSocket.onclose = function() {
+    chatSocket.onclose = () => {
         console.error("Chat socket closed unexpectedly");
     };
 }
 
-function addMessage(text, senderName, isSelf = false, time = null,senderAvatarUrl = null) {
-    const messagesContainer = document.getElementById('messagesContainer');
-    const messageTime = time || new Date().toLocaleTimeString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+// ====================== Helper: Render avatar header ======================
+function renderHeaderAvatar(name, avatarUrl) {
+    const avatarDiv = document.getElementById("headerAvatar");
+    avatarDiv.innerHTML = "";
+    if (avatarUrl && avatarUrl !== "null") {
+        const img = document.createElement("img");
+        img.src = avatarUrl;
+        img.alt = name;
+        Object.assign(img.style, {
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            borderRadius: "50%",
+        });
+        avatarDiv.appendChild(img);
+    } else {
+        avatarDiv.textContent = name.charAt(0).toUpperCase();
+    }
+}
+
+// ====================== Helper: Fetch status ======================
+function fetchStatus(userId) {
+    fetch(`/chat/status/${userId}/`)
+        .then((res) => res.json())
+        .then((data) => {
+            document.querySelector(".header-status").textContent = data.status;
+        })
+        .catch(() => {
+            document.querySelector(".header-status").textContent =
+                "Không lấy được trạng thái";
+        });
+}
+
+// ====================== Add message UI ======================
+function addMessage(text, senderName, isSelf = false, time = null, senderAvatarUrl = null) {
+    const messagesContainer = document.getElementById("messagesContainer");
+    const messageTime =
+        time ||
+        new Date().toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
 
     let avatarHtml = "";
     if (!isSelf) {
-        if (senderAvatarUrl && senderAvatarUrl !== "null") {
-            avatarHtml = `<img src="${senderAvatarUrl}" alt="${senderName}" 
-                               style="width:32px;height:32px;border-radius:50%;object-fit:cover;">`;
-        } else {
-            avatarHtml = senderName.charAt(0).toUpperCase();
-        }
+        avatarHtml =
+            senderAvatarUrl && senderAvatarUrl !== "null"
+                ? `<img src="${senderAvatarUrl}" alt="${senderName}" 
+                       style="width:32px;height:32px;border-radius:50%;object-fit:cover;">`
+                : senderName.charAt(0).toUpperCase();
     }
 
-    const html = isSelf ? `
+    const html = isSelf
+        ? `
         <div class="message sent">
             <div class="message-content">${text}</div>
         </div>
         <div class="message-time" style="text-align: right; margin-right: 12px;">${messageTime}</div>
-    ` : `
+    `
+        : `
         <div class="message received">
             <div class="message-avatar">${avatarHtml}</div>
             <div class="message-content">${text}</div>
@@ -118,34 +140,37 @@ function addMessage(text, senderName, isSelf = false, time = null,senderAvatarUr
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
+// ====================== Send message ======================
 function sendMessage() {
-    const messageInput = document.getElementById('messageInput');
     const messageText = messageInput.value.trim();
     if (!chatSocket || !messageText) return;
 
-    chatSocket.send(JSON.stringify({ message: messageText ,avatar: CURRENT_USER_AVATAR}));
-    messageInput.value = '';
+    chatSocket.send(
+        JSON.stringify({
+            message: messageText,
+            avatar: CURRENT_USER_AVATAR,
+        })
+    );
+
+    messageInput.value = "";
     messageInput.style.height = "auto";
 }
 
-const messageInput = document.getElementById('messageInput');
-messageInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
+// ====================== Input events ======================
+messageInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
     }
 });
-messageInput.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+
+messageInput.addEventListener("input", function () {
+    this.style.height = "auto";
+    this.style.height = Math.min(this.scrollHeight, 80) + "px";
 });
 
-// Search user
-const searchInput = document.querySelector('.search-input');
-const chatList = document.getElementById('chatList');
-const searchResults = document.querySelector('.search-results');
-
-searchInput.addEventListener('input', function() {
+// ====================== Search user ======================
+searchInput.addEventListener("input", function () {
     const keyword = this.value.trim();
     if (!keyword) {
         searchResults.innerHTML = "";
@@ -153,10 +178,10 @@ searchInput.addEventListener('input', function() {
     }
 
     fetch(`/chat/search-users/?q=${encodeURIComponent(keyword)}`)
-        .then(res => res.json())
-        .then(users => {
+        .then((res) => res.json())
+        .then((users) => {
             searchResults.innerHTML = "";
-            users.forEach(user => {
+            users.forEach((user) => {
                 const item = document.createElement("div");
                 item.className = "search-item";
                 item.innerHTML = `
@@ -169,39 +194,78 @@ searchInput.addEventListener('input', function() {
         });
 });
 
+// ====================== Open or create conversation ======================
 function openOrSelectConversation(userId, userName) {
     const existingItem = Array.from(chatList.children).find(
-        item => item.dataset.userId == userId
+        (item) => parseInt(item.dataset.userId, 10) === userId
     );
 
     if (existingItem) {
-        const convId = existingItem.dataset.convId;
+        const convId = parseInt(existingItem.dataset.convId, 10);
         selectChat(userId, userName, convId);
-        searchResults.innerHTML = "";
-        searchInput.value = "";
-        return;
+    } else {
+        fetch(`/chat/get-or-create-conversation/${userId}/`)
+            .then((res) => res.json())
+            .then((data) => {
+                const convId = parseInt(data.id, 10);
+                const newItem = document.createElement("div");
+                newItem.className = "chat-item";
+                newItem.dataset.userId = userId;
+                newItem.dataset.convId = convId;
+                newItem.onclick = () => selectChat(userId, userName, convId);
+                newItem.innerHTML = `
+                    <div class="avatar">${userName.charAt(0)}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">${userName}</div>
+                        <div class="chat-bottom">
+                            <div class="chat-preview">(Chưa có tin nhắn)</div>
+                            <div class="chat-time"></div>
+                        </div>
+                    </div>
+                `;
+                chatList.prepend(newItem);
+
+                selectChat(userId, userName, convId);
+            });
     }
 
-    fetch(`/chat/get-or-create-conversation/${userId}/`)
-        .then(res => res.json())
-        .then(data => {
-            const convId = data.id;
-            const newItem = document.createElement("div");
-            newItem.className = "chat-item";
-            newItem.dataset.userId = userId;
-            newItem.dataset.convId = convId;
-            newItem.onclick = () => selectChat(userId, userName, convId);
-            newItem.innerHTML = `
-                <div class="avatar">${userName.charAt(0)}</div>
-                <div class="chat-info">
-                    <div class="chat-name">${userName}</div>
-                    <div class="chat-preview">(Chưa có tin nhắn)</div>
-                </div>
-            `;
-            chatList.prepend(newItem);
+    searchResults.innerHTML = "";
+    searchInput.value = "";
+}
+// ====================== User Socket (để update danh sách chat) ======================
+const notifSocket = new WebSocket(
+    `${protocol}://${window.location.host}/ws/notifications/`
+);
 
-            selectChat(userId, userName, convId);
-            searchResults.innerHTML = "";
-            searchInput.value = "";
-        });
+notifSocket.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    if (data.type === "chat_list_update") {
+        updateChatListPreview(data.conv_id, data.last_text, data.time, data.sender_id);
+    }
+};
+
+notifSocket.onclose = () => {
+    console.error("Notification socket closed unexpectedly");
+};
+
+// ====================== Update chat list preview ======================
+function updateChatListPreview(convId, lastText, time, senderId) {
+    const chatItem = document.querySelector(`.chat-item[data-conv-id="${convId}"]`);
+    if (!chatItem) return;
+
+    const preview = chatItem.querySelector(".chat-preview");
+    if (preview) {
+        preview.innerHTML =
+            senderId === CURRENT_USER_ID
+                ? `<span class="sender-label">Bạn:</span> ${lastText}`
+                : lastText;
+    }
+
+    const timeDiv = chatItem.querySelector(".chat-time");
+    if (timeDiv) {
+        timeDiv.textContent = time;
+    }
+
+    // Đưa hội thoại lên đầu danh sách
+    chatList.prepend(chatItem);
 }

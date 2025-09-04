@@ -151,7 +151,8 @@ def chat_page(request):
 
     return render(request, "chat/chat.html", {
         "conversations": conv_data,
-        "current_user_name": request.user.full_name
+        "current_user_name": request.user.full_name,
+        "current_user_id": user.id,
     })
 
     
