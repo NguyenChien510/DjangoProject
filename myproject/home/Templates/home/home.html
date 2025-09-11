@@ -2,79 +2,475 @@
 {% load static %} 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'home/style.css' %}" />
+<style>
+    .comment-input-wrapper {
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+        padding:20px;
+    }
+  
+    .comment-input-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+  
+    .comment-input {
+        width: 100%;
+        min-height: 100px;
+        padding: 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        resize: vertical;
+        font-family: inherit;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+        background: white;
+    }
+  
+    .comment-input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+  
+      /* Custom scrollbar */
+  .modal2-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal2-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.modal2-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.modal2-body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+     /* Chặn scroll body khi modal mở */
+  body.no-scroll {
+    overflow: hidden;
+}
+.delete-comment-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 34px;
+    cursor: pointer;
+    margin-left: auto; /* đẩy nút sang bên phải */
+    transition: color 0.2s;
+}
+
+.delete-comment-btn:hover {
+    color: red;
+}
+
+/* Overlay phủ toàn màn hình */
+.modal2-overlay {
+display: none;
+position: fixed;
+inset: 0; /* top:0; right:0; bottom:0; left:0; */
+background: rgba(0,0,0,0.5);
+justify-content: center;
+align-items: center;
+z-index: 1000;
+}
+
+/* Hiển thị overlay khi active */
+.modal2-overlay.active {
+display: flex;
+}
+
+/* Modal chính */
+.modal2 {
+background: white;
+border-radius: 20px;
+width: 60%;
+max-width: 800px;
+max-height: 90vh; /* chiếm 90% chiều cao màn hình */
+display: flex;
+flex-direction: column;
+overflow: hidden; /* header và form cố định */
+box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+transform: scale(0.7);
+transition: transform 0.3s ease;
+position: relative;
+}
+
+/* Khi active modal */
+.modal2-overlay.active .modal2 {
+transform: scale(1);
+}
+
+/* Modal header */
+.modal2-header {
+background: linear-gradient(135deg, #667eea, #764ba2);
+color: white;
+padding: 20px 25px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+flex-shrink: 0;
+}
+
+/* Modal body scrollable */
+.modal2-body {
+flex: 1; /* chiếm hết phần còn lại */
+overflow-y: auto; /* scroll bên trong */
+padding: 0;
+}
+
+/* Form comment */
+.comment-form {
+padding: 20px;
+border-bottom: 1px solid #eee;
+background: #f8f9fa;
+flex-shrink: 0;
+}
+
+.modal2-title {
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+  /* Layout mới */
+  .home-container {
+    display: grid;
+    grid-template-columns: 230px 1fr 250px;
+    gap: 20px;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* Left sidebar */
+  .left-sidebar {
+    background: white;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: fit-content;
+    position: sticky;
+    top: 80px;
+  }
+  
+  .profile-card {
+    text-align: center;
+  }
+  
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    overflow: hidden;
+  }
+  
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .profile-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .profile-username {
+    color: #65676b;
+    margin-bottom: 15px;
+  }
+  
+  .profile-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 10px;
+  }
+  
+  .stat-item {
+    text-align: center;
+  }
+  
+  .stat-count {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    color: #65676b;
+  }
+  
+  .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  
+  .sidebar-menu a {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    color: #050505;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  
+  .sidebar-menu a:hover {
+    background: #f0f2f5;
+  }
+  
+  .menu-icon {
+    margin-right: 10px;
+    font-size: 1.2rem;
+  }
+  
+  /* Right sidebar */
+  .right-sidebar {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: fit-content;
+    position: sticky;
+    top: 80px;
+  }
+  
+  .sidebar-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .friend-suggestion {
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  
+  .friend-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f2f5;
+    color: #050505;
+    font-weight: 600;
+    overflow: hidden;
+  }
+  
+  .friend-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .friend-info {
+    flex: 1;
+  }
+  
+  .friend-name {
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+  
+  .mutual-friends {
+    font-size: 10px;
+    color: #65676b;
+  }
+  
+  .add-friend-btn {
+    background: #e7f3ff;
+    color: #1877f2;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .add-friend-btn:hover {
+    background: #dbe7f2;
+  }
+  
+  .view-all {
+    text-align: center;
+    margin-top: 15px;
+  }
+  
+  .view-all a {
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  /* Main feed adjustments */
+  .main-feed {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  
+
+  
+</style>
 {% endblock %} 
 
 {% block content %}
-<div class="container">
-  <main class="main-feed">
-    <form
-  method="post"
-  enctype="multipart/form-data"
-  action="{% url 'create_post' %}"
-  id="post-form"
->
-  {% csrf_token %}
-  <div class="create-post">
-    <div class="post-input">
-      <div class="post-avatar" style="width:55px;">
+<div class="home-container">
+  <!-- Left sidebar -->
+  <aside class="left-sidebar">
+    <div class="profile-card">
+      <div class="profile-avatar">
         {% if user.avatar %}
           <img src="{{ user.avatar.url }}" alt="{{ user.full_name }}" />
         {% else %}
           {{ user.full_name|slice:":1" }}
         {% endif %}
       </div>
-      <div 
-        id="editor" 
-        contenteditable="true" 
-        placeholder="Bạn đang nghĩ gì?"
-        style="border:1px solid #ccc; padding:10px; min-height:100px;"
-      ></div>
-      <!-- Hidden input để gửi text lên server -->
-      <input type="hidden" name="content" id="hidden-content">
-    </div>
-
-    <div class="post-actions">
-      <div class="post-options">
-        <label for="image-upload" class="custom-file-upload">📷 Chọn ảnh</label>
-        <input
-          id="image-upload"
-          type="file"
-          name="media"
-          accept="image/*"
-        />
+      <div class="profile-name">{{ user.full_name }}</div>
+      <div class="profile-username">@{{ user.username }}</div>
+      
+      <div class="profile-stats">
+        <div class="stat-item">
+          <div class="stat-count">125</div>
+          <div class="stat-label">Bạn bè</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-count">42</div>
+          <div class="stat-label">Bài viết</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-count">256</div>
+          <div class="stat-label">Lượt thích</div>
+        </div>
       </div>
-      <button type="submit" class="post-btn">Đăng bài</button>
     </div>
-  </div>
-</form>
+    
+    <ul class="sidebar-menu">
+      <li><a href="{% url 'personal' %}"><span class="menu-icon">👤</span> Trang cá nhân</a></li>
+      <li><a href="#"><span class="menu-icon">👥</span> Bạn bè</a></li>
+      <li><a href="{% url 'logout' %}"><span class="menu-icon">🚪</span> Đăng xuất</a></li>
+    </ul>
+  </aside>
+  
+  <!-- Main feed (giữ nguyên code gốc) -->
+  <main class="main-feed">
+    <form
+      method="post"
+      enctype="multipart/form-data"
+      action="{% url 'create_post' %}"
+      id="post-form"
+    >
+      {% csrf_token %}
+      <div class="create-post">
+        <div class="post-input">
+          <div class="post-avatar" style="width:55px;">
+            {% if user.avatar %}
+              <img src="{{ user.avatar.url }}" alt="{{ user.full_name }}" />
+            {% else %}
+              {{ user.full_name|slice:":1" }}
+            {% endif %}
+          </div>
+          <div 
+            id="editor" 
+            contenteditable="true" 
+            placeholder="Bạn đang nghĩ gì?"
+            style="border:1px solid #ccc; padding:10px; min-height:100px;"
+          ></div>
+          <!-- Hidden input để gửi text lên server -->
+          <input type="hidden" name="content" id="hidden-content">
+        </div>
+
+        <div class="post-actions">
+          <div class="post-options">
+            <label for="image-upload" class="custom-file-upload">📷 Chọn ảnh</label>
+            <input
+              id="image-upload"
+              type="file"
+              name="media"
+              accept="image/*"
+            />
+          </div>
+          <button type="submit" class="post-btn">Đăng bài</button>
+        </div>
+      </div>
+    </form>
 
     {% for post in posts %}
     <article class="post">
       <div class="post-header"  style="position: relative;">
 
-    <!-- Nút delete -->
-    {% if post.user == user %}
-    <button class="delete-post-btn" onclick="deletePost({{ post.id }})" 
-            style="position: absolute; top: 5px; right: 5px; background: transparent; border: none; cursor: pointer; font-size: 18px;">
-        ✖
-    </button>
-    {% endif %}
+        <!-- Nút delete -->
+        {% if post.user == user %}
+        <button class="delete-post-btn" onclick="deletePost({{ post.id }})" 
+                style="position: absolute; top: 5px; right: 5px; background: transparent; border: none; cursor: pointer; font-size: 18px;">
+            ✖
+        </button>
+        {% endif %}
 
-    <div class="post-avatar">
-        <a href="{% url 'personal_with_id' post.user.id %}" style="text-decoration:none;color:white">
-            {% if post.user.avatar %}
-                <img src="{{ post.user.avatar.url }}" alt="{{ post.user.full_name }}" />
-            {% else %} 
-                {{ post.user.full_name|slice:":1" }} 
-            {% endif %}
-        </a>
-    </div>
-    <div class="post-user-info">
-        <a href="{% url 'personal_with_id' post.user.id %}" class="user-link" style="text-decoration:none;color:black">
-            <h4>{{ post.user.full_name }}</h4>
-        </a>
-            <div class="post-time">{{ post.created_at|timesince }} ago</div>
-    </div>
+        <div class="post-avatar">
+            <a href="{% url 'personal_with_id' post.user.id %}" style="text-decoration:none;color:white">
+                {% if post.user.avatar %}
+                    <img src="{{ post.user.avatar.url }}" alt="{{ post.user.full_name }}" />
+                {% else %} 
+                    {{ post.user.full_name|slice:":1" }} 
+                {% endif %}
+            </a>
+        </div>
+        <div class="post-user-info">
+            <a href="{% url 'personal_with_id' post.user.id %}" class="user-link" style="text-decoration:none;color:black">
+                <h4>{{ post.user.full_name }}</h4>
+            </a>
+                <div class="post-time">{{ post.created_at|timesince }} ago</div>
+        </div>
       </div>
       <div class="post-content">{{ post.content }}</div>
       {% if post.media %}
@@ -94,9 +490,62 @@
     </article>
     {% endfor %}
   </main>
+  
+  <!-- Right sidebar -->
+  <aside class="right-sidebar">
+    <h3 class="sidebar-title">Gợi ý kết bạn</h3>
+    
+    <div class="friend-suggestion">
+      <div class="friend-avatar">
+        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Nguyễn Văn A">
+      </div>
+      <div class="friend-info">
+        <div class="friend-name">Nguyễn Văn A</div>
+        <div class="mutual-friends">15 bạn chung</div>
+      </div>
+      <button class="add-friend-btn">Thêm bạn</button>
+    </div>
+    
+    <div class="friend-suggestion">
+      <div class="friend-avatar">
+        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Trần Thị B">
+      </div>
+      <div class="friend-info">
+        <div class="friend-name">Trần Thị B</div>
+        <div class="mutual-friends">8 bạn chung</div>
+      </div>
+      <button class="add-friend-btn">Thêm bạn</button>
+    </div>
+    
+    <div class="friend-suggestion">
+      <div class="friend-avatar">
+        <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Lê Văn C">
+      </div>
+      <div class="friend-info">
+        <div class="friend-name">Lê Văn C</div>
+        <div class="mutual-friends">5 bạn chung</div>
+      </div>
+      <button class="add-friend-btn">Thêm bạn</button>
+    </div>
+    
+    <div class="friend-suggestion">
+      <div class="friend-avatar">
+        <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Phạm Thị D">
+      </div>
+      <div class="friend-info">
+        <div class="friend-name">Phạm Thị D</div>
+        <div class="mutual-friends">12 bạn chung</div>
+      </div>
+      <button class="add-friend-btn">Thêm bạn</button>
+    </div>
+    
+    <div class="view-all">
+      <a href="#">Xem tất cả</a>
+    </div>
+  </aside>
 </div>
 
-
+<!-- Các phần modal và toast message giữ nguyên -->
 {% if messages %}
 <div id="toast-container">
   {% for message in messages %}
@@ -104,455 +553,6 @@
   {% endfor %}
 </div>
 {% endif %}
-
-
-<style>
-  /* Chặn scroll body khi modal mở */
-  body.no-scroll {
-      overflow: hidden;
-  }
-  .delete-comment-btn {
-      background: none;
-      border: none;
-      color: #888;
-      font-size: 34px;
-      cursor: pointer;
-      margin-left: auto; /* đẩy nút sang bên phải */
-      transition: color 0.2s;
-  }
-  
-  .delete-comment-btn:hover {
-      color: red;
-  }
-
-  /* Overlay phủ toàn màn hình */
-  .modal2-overlay {
-  display: none;
-  position: fixed;
-  inset: 0; /* top:0; right:0; bottom:0; left:0; */
-  background: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  }
-
-  /* Hiển thị overlay khi active */
-  .modal2-overlay.active {
-  display: flex;
-  }
-
-  /* Modal chính */
-  .modal2 {
-  background: white;
-  border-radius: 20px;
-  width: 60%;
-  max-width: 800px;
-  max-height: 90vh; /* chiếm 90% chiều cao màn hình */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden; /* header và form cố định */
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-  transform: scale(0.7);
-  transition: transform 0.3s ease;
-  position: relative;
-  }
-
-  /* Khi active modal */
-  .modal2-overlay.active .modal2 {
-  transform: scale(1);
-  }
-
-  /* Modal header */
-  .modal2-header {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  padding: 20px 25px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-  }
-
-  /* Modal body scrollable */
-  .modal2-body {
-  flex: 1; /* chiếm hết phần còn lại */
-  overflow-y: auto; /* scroll bên trong */
-  padding: 0;
-  }
-
-  /* Form comment */
-  .comment-form {
-  padding: 20px;
-  border-bottom: 1px solid #eee;
-  background: #f8f9fa;
-  flex-shrink: 0;
-  }
-
-  .modal2-title {
-      font-size: 20px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-  }
-
-  .close-btn {
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      color: white;
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      transition: all 0.2s ease;
-  }
-
-  .close-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: rotate(90deg);
-  }
-
-  .user-avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      display: flex;
-      background: linear-gradient(45deg, #4ecdc4, #44a08d);
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      font-size: 1.2rem;
-
-      overflow:hidden;
-  }
-
-  .user-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover; /* Ảnh bao phủ vừa vặn, không méo */
-      display: block; /* loại bỏ khoảng trắng dưới ảnh */
-  }
-
-  .comment-input-wrapper {
-      display: flex;
-      gap: 15px;
-      align-items: flex-start;
-      padding:20px;
-  }
-
-  .comment-input-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-  }
-
-  .comment-input {
-      width: 100%;
-      min-height: 100px;
-      padding: 15px;
-      border: 2px solid #e9ecef;
-      border-radius: 15px;
-      resize: vertical;
-      font-family: inherit;
-      font-size: 14px;
-      transition: border-color 0.3s ease;
-      background: white;
-  }
-
-  .comment-input:focus {
-      outline: none;
-      border-color: #667eea;
-  }
-
-  .attachment-section {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-  }
-
-  .attachment-controls {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-  }
-
-  .file-input {
-      display: none;
-  }
-
-  .attach-btn {
-      background: #f8f9fa;
-      border: 2px solid #e9ecef;
-      color: #667eea;
-      padding: 8px 15px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s ease;
-  }
-
-  .attach-btn:hover {
-      background: #667eea;
-      color: white;
-      border-color: #667eea;
-  }
-
-  .submit-btn {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-  }
-
-  .submit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-  }
-
-  .preview-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-  }
-
-  .image-preview {
-      position: relative;
-      width: 80px;
-      height: 80px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 2px solid #e9ecef;
-  }
-
-  .image-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-  }
-
-  .remove-image {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: #ff4757;
-      color: white;
-      border: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-  }
-
-  .remove-image:hover {
-      background: #ff3742;
-      transform: scale(1.1);
-  }
-
-  .comments-list {
-      padding: 0;
-  }
-
-  .comment-item {
-      padding: 15px 15px;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background-color 0.2s ease;
-  }
-
-  .comment-item:hover {
-      background: #f8f9fa;
-  }
-
-  .comment-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-  }
-
-  .comment-author {
-      font-size:17px;
-      font-weight: 600;
-      color: #333;
-  }
-
-  .comment-time {
-      color: #888;
-      font-size: 15px;
-  }
-
-  .comment-content {
-      color: #555;
-      line-height: 1.6;
-      margin-bottom: 10px;
-      font-size:20px;
-  }
-
-  .comment-images {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-  }
-
-  .comment-image {
-      width: 150px;
-      height: 150px;
-      border-radius: 8px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-  }
-
-  .comment-image:hover {
-      transform: scale(1.05);
-  }
-
-  .comment-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-  }
-
-  .comment-actions {
-      margin-top: 12px;
-      display: flex;
-      gap: 15px;
-  }
-
-  .action-btn {
-      background: none;
-      border: none;
-      color: #888;
-      cursor: pointer;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 5px 10px;
-      border-radius: 15px;
-      transition: all 0.2s ease;
-  }
-
-  .action-btn:hover {
-      background: #f0f0f0;
-      color: #667eea;
-  }
-
-  .empty-state {
-      text-align: center;
-      padding: 60px 25px;
-      color: #888;
-  }
-
-  .empty-state-icon {
-      font-size: 48px;
-      margin-bottom: 15px;
-      opacity: 0.5;
-  }
-
-  /* Image viewer modal */
-  .image-viewer-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-  }
-
-  .image-viewer-overlay.active {
-      display: flex;
-  }
-
-  .image-viewer {
-      max-width: 90%;
-      max-height: 90%;
-  }
-
-  .image-viewer img {
-      max-width: 100%;
-      max-height: 100%;
-      border-radius: 10px;
-  }
-
-  /* Custom scrollbar */
-  .modal2-body::-webkit-scrollbar {
-      width: 6px;
-  }
-
-  .modal2-body::-webkit-scrollbar-track {
-      background: #f1f1f1;
-  }
-
-  .modal2-body::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 3px;
-  }
-
-  .modal2-body::-webkit-scrollbar-thumb:hover {
-      background: #a8a8a8;
-  }
-
-  @media (max-width: 640px) {
-      .modal2 {
-          width: 95%;
-          max-height: 90vh;
-      }
-      
-      .comment-form {
-          padding: 20px;
-      }
-      
-      .comment-item {
-          padding: 15px 20px;
-      }
-
-      .comment-input-wrapper {
-          flex-direction: column;
-          gap: 10px;
-      }
-
-      .image-preview {
-          width: 60px;
-          height: 60px;
-      }
-  }
-</style>
-
-<style>
-    .highlight-comment {
-        background: #fff3cd;
-        border-left: 3px solid #ffc107;
-        padding-left: 8px;
-        animation: blink 1s ease-in-out 3;
-    }
-    
-    @keyframes blink {
-        50% { opacity: 0.5; }
-    }
-</style>
 
 <!-- Modal (đặt 1 modal dùng chung cho tất cả post) -->
 <div class="modal2-overlay" id="modal2Overlay" onclick="closeModalOnOverlay(event)">
@@ -589,8 +589,10 @@
     </div>
   </div>
 </div>
+{% endblock %} 
 
-
+{% block extra_js %}
+<script src="{% static 'home/script.js' %}" defer></script>
 <script>
   function openModal(postId) {
       fetch(`/get-comments/${postId}/`)
@@ -696,17 +698,4 @@
       });
   }
 </script>
-
-
-
-
-
-
-
-
-
-{% endblock %} 
-
-{% block extra_js %}
-<script src="{% static 'home/script.js' %}" defer></script>
 {% endblock %}

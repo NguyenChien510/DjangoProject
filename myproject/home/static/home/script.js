@@ -185,3 +185,108 @@ form.addEventListener("submit", function() {
 
   document.getElementById("hidden-content").value = textContent;
 });
+
+
+    function openModal(postId) {
+      fetch(`/get-comments/${postId}/`)
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById("commentsList").innerHTML = html;
+
+          // gán action form
+          const form = document.getElementById("commentForm");
+          form.dataset.postId = postId;
+          form.action = `/add-comment/${postId}/`;
+
+          const overlay = document.getElementById("modal2Overlay");
+          overlay.classList.add("active");
+
+          // chặn scroll body
+          document.body.classList.add("no-scroll");
+        });
+  }
+
+  function closeModal() {
+      const overlay = document.getElementById("modal2Overlay");
+      overlay.classList.remove("active");
+
+      // cho phép scroll lại
+      document.body.classList.remove("no-scroll");
+  }
+
+  function closeModalOnOverlay(event) {
+      if (event.target === event.currentTarget) {
+          closeModal();
+      }
+  }
+
+  // Bắt sự kiện ESC
+  document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") {
+          closeModal();
+      }
+  });
+
+  // Submit comment
+  document.getElementById("commentForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const postId = form.dataset.postId;
+      const formData = new FormData(form);
+  
+      const content = formData.get("content").trim();
+      const image = formData.get("image");
+      if (!content && (!image || image.size === 0)) {
+          alert("Vui lòng nhập nội dung hoặc chọn ảnh!");
+          return;
+      }
+      fetch(`/add-comment/${postId}/`, {
+          method: "POST",
+          body: formData,
+          headers: { "X-CSRFToken": formData.get("csrfmiddlewaretoken") }
+      })
+      .then(res => res.json())
+      .then(data => {
+          if (data.error) {
+              alert(data.error);
+          } else {
+            const commentsList = document.getElementById("commentsList");
+
+            // Xóa dòng "Chưa có bình luận nào" nếu có
+            const noComment = commentsList.querySelector(".no-comment");
+            if (noComment) {
+                noComment.remove();
+            }
+    
+            // Thêm comment mới
+            commentsList.insertAdjacentHTML("afterbegin", data.html);
+            form.reset();
+          }
+      });
+  });
+  
+  function deleteComment(commentId, postId) {
+      if (!confirm("Bạn có chắc chắn muốn xóa bình luận này không?")) {
+          return; // hủy xóa
+      }
+      fetch(`/delete_comment/${commentId}/`, {
+          method: "POST",
+          headers: {
+              "X-CSRFToken": getCookie("csrftoken")
+          }
+      })
+      .then(res => res.json())
+      .then(data => {
+          if (data.success) {
+              // Xoá comment khỏi DOM
+              let cmtElem = document.querySelector(`#comment-${data.comment_id}`);
+              if (cmtElem) cmtElem.remove();
+  
+              // Update commentCount
+              let countElem = document.querySelector(`#comment-count-${data.post_id}`);
+              if (countElem) {
+                  countElem.textContent = data.commentCount;
+              }
+          }
+      });
+  }
