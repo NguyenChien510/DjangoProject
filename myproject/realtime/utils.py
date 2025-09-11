@@ -19,6 +19,9 @@ def send_notification(user, message,sender=None, post=None,comment=None):
             "post_id": notification.post.id if notification.post else None,
             "count": Notification.objects.filter(user=user, is_read=False).count(),
             "comment_id": notification.comment.id if notification.comment else None,
+            "sender_id": notification.sender.id if notification.sender else None,
+            "sender_img_url": notification.sender.avatar.url if notification.sender.avatar else None,
+            "sender_name": notification.sender.full_name if notification.sender.full_name else None,
         }
     )
     

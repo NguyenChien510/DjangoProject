@@ -229,3 +229,157 @@ body {
         right: -1rem;
     }
 }
+
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    margin: 5% auto;
+    padding: 2rem;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalFadeIn 0.3s ease forwards;
+
+
+    overflow: hidden; 
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+.modal-header h2 {
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.close {
+    color: #666;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close:hover {
+    color: #ff6b6b;
+}
+
+/* .friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+} */
+
+
+/* Friends list: có scroll nhưng ẩn scrollbar */
+.friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: calc(80vh - 120px); /* <= đảm bảo friends-list có chiều cao cố định để overflow xảy ra */
+    overflow-y: auto;                /* bật cuộn dọc */
+    -webkit-overflow-scrolling: touch; /* mượt trên iOS */
+    -ms-overflow-style: none;        /* IE, Edge cũ */
+    scrollbar-width: none;           /* Firefox */
+    padding-right: 6px;              /* giữ khoảng để nội dung không bị che bởi scrollbar ẩn */
+  }
+
+  .friends-list {
+    max-height: 60vh;        /* hoặc px: ví dụ 360px */
+    overflow-y: auto;
+    padding-right: 8px;      /* tránh nội dung bị che khi scrollbar hiển thị */
+    -webkit-overflow-scrolling: touch; /* mượt trên iOS */
+  }
+  
+  /* ===== Chrome / Safari / Edge (WebKit) ===== */
+  .friends-list::-webkit-scrollbar {
+    width: 10px;             /* bề rộng scrollbar */
+    height: 10px;            /* cho scrollbar ngang (nếu cần) */
+  }
+  
+  .friends-list::-webkit-scrollbar-track {
+    background: #f1f3f5;
+    border-radius: 8px;
+  }
+  
+  .friends-list::-webkit-scrollbar-thumb {
+    background: #5b9bd5;
+    border-radius: 8px;
+    border: 2px solid #f1f3f5; /* tạo khoảng trắng bao quanh thumb */
+  }
+  
+  .friends-list::-webkit-scrollbar-thumb:hover {
+    background: #497fb0;
+  }
+
+
+
+.friend-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.friend-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(5px);
+}
+
+.friend-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.friend-info {
+    flex-grow: 1;
+}
+
+.friend-name {
+    font-weight: 600;
+    font: size 16px;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+

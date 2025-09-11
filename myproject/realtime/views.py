@@ -41,7 +41,8 @@ def like_post(request, post_id):
             send_notification(
                 user=post.user,
                 message=f"❤️ {request.user.full_name} đã thích bài viết của bạn",
-                post =post
+                post =post,
+                sender=request.user,
             )
 
         return JsonResponse({
@@ -74,7 +75,7 @@ def add_comment(request, post_id):
         user=request.user,
         content=content,
         image=image if image else None,
-        parent=parent
+        parent=parent,
     )
 
     # Tăng commentCount của post
@@ -88,6 +89,7 @@ def add_comment(request, post_id):
             message=f"💬 {request.user.full_name} đã bình luận bài viết của bạn",
             post=post,
             comment=comment,
+            sender=request.user,
         )
 
     # render partial template

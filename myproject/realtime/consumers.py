@@ -25,7 +25,14 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         """Gửi notification xuống client"""
         await self.send(text_data=json.dumps({
             "type": "notification",
+            "id": event.get("id"),
             "message": event.get("message"),
+            "post_id": event.get("post_id"),
+            "comment_id": event.get("comment_id"),
+            "count": event.get("count"),
+            "sender_id": event.get("sender_id"),
+            "sender_img_url": event.get("sender_img_url"),
+            "sender_name": event.get("sender_name"),
             "extra": event.get("extra", {})
         }))
 

@@ -15,10 +15,6 @@ body {
 }
 
 
-  /* Chặn scroll body khi modal mở */
-  body.no-scroll {
-      overflow: hidden;
-  }
   .delete-comment-btn {
       background: none;
       border: none;
@@ -33,60 +29,9 @@ body {
       color: red;
   }
 
-  /* Overlay phủ toàn màn hình */
-  .modal2-overlay {
-  display: none;
-  position: fixed;
-  inset: 0; /* top:0; right:0; bottom:0; left:0; */
-  background: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  }
+  
 
-  /* Hiển thị overlay khi active */
-  .modal2-overlay.active {
-  display: flex;
-  }
-
-  /* Modal chính */
-  .modal2 {
-  background: white;
-  border-radius: 20px;
-  width: 60%;
-  max-width: 800px;
-  max-height: 90vh; /* chiếm 90% chiều cao màn hình */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden; /* header và form cố định */
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-  transform: scale(0.7);
-  transition: transform 0.3s ease;
-  position: relative;
-  }
-
-  /* Khi active modal */
-  .modal2-overlay.active .modal2 {
-  transform: scale(1);
-  }
-
-  /* Modal header */
-  .modal2-header {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  padding: 20px 25px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-  }
-
-  /* Modal body scrollable */
-  .modal2-body {
-  flex: 1; /* chiếm hết phần còn lại */
-  overflow-y: auto; /* scroll bên trong */
-  padding: 0;
-  }
+  
 
   /* Form comment */
   .comment-form {
@@ -96,13 +41,7 @@ body {
   flex-shrink: 0;
   }
 
-  .modal2-title {
-      font-size: 20px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-  }
+
 
   .close-btn {
       background: rgba(255, 255, 255, 0.2);
@@ -376,7 +315,6 @@ body {
       opacity: 0.5;
   }
 
-  /* Image viewer modal */
   .image-viewer-overlay {
       position: fixed;
       top: 0;
@@ -405,48 +343,9 @@ body {
       border-radius: 10px;
   }
 
-  /* Custom scrollbar */
-  .modal2-body::-webkit-scrollbar {
-      width: 6px;
-  }
 
-  .modal2-body::-webkit-scrollbar-track {
-      background: #f1f1f1;
-  }
 
-  .modal2-body::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 3px;
-  }
-
-  .modal2-body::-webkit-scrollbar-thumb:hover {
-      background: #a8a8a8;
-  }
-
-  @media (max-width: 640px) {
-      .modal2 {
-          width: 95%;
-          max-height: 90vh;
-      }
-      
-      .comment-form {
-          padding: 20px;
-      }
-      
-      .comment-item {
-          padding: 15px 20px;
-      }
-
-      .comment-input-wrapper {
-          flex-direction: column;
-          gap: 10px;
-      }
-
-      .image-preview {
-          width: 60px;
-          height: 60px;
-      }
-  }
+ 
 
 
 

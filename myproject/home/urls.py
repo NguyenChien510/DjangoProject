@@ -22,7 +22,6 @@ urlpatterns = [
     path('get-comments/<int:post_id>/', views.get_comments, name='get_comments'),
     path("delete_comment/<int:comment_id>/", views.delete_comment, name="delete_comment"),
     
-    
     path('postdetail/<int:post_id>', views.profile_view, name='post_detail'),
     path('add-comment/<int:post_id>/', viewrealtime.add_comment, name='add_comment'),
     path('findfriend',views.findfriend,name='findfriend'),

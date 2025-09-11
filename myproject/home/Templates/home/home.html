@@ -35,26 +35,26 @@
         border-color: #667eea;
     }
   
-      /* Custom scrollbar */
-  .modal2-body::-webkit-scrollbar {
+#friendsModal {
+  display:none;
+}
+    
+.modal2-body::-webkit-scrollbar {
     width: 6px;
 }
-
 .modal2-body::-webkit-scrollbar-track {
     background: #f1f1f1;
 }
-
 .modal2-body::-webkit-scrollbar-thumb {
     background: #c1c1c1;
     border-radius: 3px;
 }
-
 .modal2-body::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
 
-     /* Chặn scroll body khi modal mở */
-  body.no-scroll {
+/* Chặn scroll body khi modal mở */
+body.no-scroll {
     overflow: hidden;
 }
 .delete-comment-btn {
@@ -73,40 +73,37 @@
 
 /* Overlay phủ toàn màn hình */
 .modal2-overlay {
-display: none;
-position: fixed;
-inset: 0; /* top:0; right:0; bottom:0; left:0; */
-background: rgba(0,0,0,0.5);
-justify-content: center;
-align-items: center;
-z-index: 1000;
+  display: none;
+  position: fixed;
+  inset: 0; /* top:0; right:0; bottom:0; left:0 */
+  background: rgba(0,0,0,0.6);
+  z-index: 2000;
 }
 
 /* Hiển thị overlay khi active */
 .modal2-overlay.active {
-display: flex;
+  display: flex !important; /* hoặc block tùy bạn */
+  justify-content:center;
+  align-items:center;
 }
 
 /* Modal chính */
 .modal2 {
-background: white;
-border-radius: 20px;
-width: 60%;
-max-width: 800px;
-max-height: 90vh; /* chiếm 90% chiều cao màn hình */
-display: flex;
-flex-direction: column;
-overflow: hidden; /* header và form cố định */
-box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-transform: scale(0.7);
-transition: transform 0.3s ease;
-position: relative;
+  background: white;
+  border-radius: 20px;
+  width: 60%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  transform: scale(0.7);
+  transition: transform 0.3s ease;
+  position: relative;
 }
 
-/* Khi active modal */
-.modal2-overlay.active .modal2 {
-transform: scale(1);
-}
+
 
 /* Modal header */
 .modal2-header {
@@ -196,7 +193,7 @@ flex-shrink: 0;
     justify-content: center;
     font-size: 2.5rem;
     color: white;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(45deg, rgb(78, 205, 196), rgb(68, 160, 141));
     overflow: hidden;
   }
   
@@ -266,8 +263,8 @@ flex-shrink: 0;
   /* Right sidebar */
   .right-sidebar {
     background: white;
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 8px;
+    padding: 16px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     height: fit-content;
     position: sticky;
@@ -275,10 +272,10 @@ flex-shrink: 0;
   }
   
   .sidebar-title {
-    font-size: 1.2rem;
+    font-size: 16px;
     font-weight: 600;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
+    margin-bottom: 4px;
+    padding-bottom: 6px;
     border-bottom: 1px solid #eee;
   }
   
@@ -316,7 +313,7 @@ flex-shrink: 0;
   .friend-name {
     font-weight: 600;
     font-size: 12px;
-    margin-bottom: 3px;
+    margin-bottom: 1px;
   }
   
   .mutual-friends {
@@ -329,8 +326,8 @@ flex-shrink: 0;
     color: #1877f2;
     border: none;
     border-radius: 4px;
-    padding: 2px 6px;
-    font-size: 15px;
+    padding: 6px 6px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
@@ -376,19 +373,19 @@ flex-shrink: 0;
         {% endif %}
       </div>
       <div class="profile-name">{{ user.full_name }}</div>
-      <div class="profile-username">@{{ user.username }}</div>
+      <div class="profile-username" style="font-size:10px">{{ user.email }}</div>
       
       <div class="profile-stats">
         <div class="stat-item">
-          <div class="stat-count">125</div>
+          <div class="stat-count">{{numberfriends}}</div>
           <div class="stat-label">Bạn bè</div>
         </div>
         <div class="stat-item">
-          <div class="stat-count">42</div>
+          <div class="stat-count">{{numberposts}}</div>
           <div class="stat-label">Bài viết</div>
         </div>
         <div class="stat-item">
-          <div class="stat-count">256</div>
+          <div class="stat-count">{{totallikeposts}}</div>
           <div class="stat-label">Lượt thích</div>
         </div>
       </div>
@@ -396,7 +393,7 @@ flex-shrink: 0;
     
     <ul class="sidebar-menu">
       <li><a href="{% url 'personal' %}"><span class="menu-icon">👤</span> Trang cá nhân</a></li>
-      <li><a href="#"><span class="menu-icon">👥</span> Bạn bè</a></li>
+      {% comment %} <li><a href="#" onclick="openFriendsModal()"><span class="menu-icon">👥</span> Bạn bè</a></li> {% endcomment %}
       <li><a href="{% url 'logout' %}"><span class="menu-icon">🚪</span> Đăng xuất</a></li>
     </ul>
   </aside>
@@ -545,7 +542,32 @@ flex-shrink: 0;
   </aside>
 </div>
 
-<!-- Các phần modal và toast message giữ nguyên -->
+{% comment %} <div id="friendsModal" class="modal">
+  <div class="modal-content">
+      <div class="modal-header">
+          <h2>Danh sách bạn bè</h2>
+          <span class="close" onclick="closeFriendsModal()">&times;</span>
+      </div>
+      <div class="friends-list" id="friendsList">
+          {% for friend in friends %}
+          <a href="{% url 'personal_with_id' friend.id %}" class="friend-item" style="text-decoration:none">
+              <div class="post-avatar">
+                  {% if friend.avatar %}
+                  <img src="{{ friend.avatar }}" alt="{{ friend.name }}">
+                  {% else %}
+                  {{ friend.name|slice:":1" }}
+                  {% endif %}
+              </div>
+              <div class="friend-info">
+                  <div class="friend-name">{{ friend.name }}</div>
+              </div>
+          </a>
+          {% empty %}
+          <p>Không có bạn bè nào</p>
+          {% endfor %}
+      </div>
+  </div>  {% endcomment %}
+
 {% if messages %}
 <div id="toast-container">
   {% for message in messages %}
@@ -586,6 +608,8 @@ flex-shrink: 0;
       <div class="comments-list" id="commentsList">
         <!-- HTML comment sẽ được load vào đây -->
       </div>
+
+    </div>
     </div>
   </div>
 </div>
@@ -595,6 +619,7 @@ flex-shrink: 0;
 <script src="{% static 'home/script.js' %}" defer></script>
 <script>
   function openModal(postId) {
+    
       fetch(`/get-comments/${postId}/`)
         .then(res => res.text())
         .then(html => {
@@ -696,6 +721,17 @@ flex-shrink: 0;
               }
           }
       });
+  }
+  function openFriendsModal() {
+  // Hiển thị modal
+  const modal = document.getElementById("friendsModal");
+  if (modal) {
+    modal.style.display = "block";
+  }
+  }
+  
+  function closeFriendsModal() {
+    document.getElementById("friendsModal").style.display = "none";
   }
 </script>
 {% endblock %}

@@ -59,10 +59,33 @@ def home(request):
                         .values_list('post_id', flat=True)
     )
     
+    friendships = Friendship.objects.filter(
+        status='accepted'
+    ).filter(
+        Q(user1=request.user) | Q(user2=request.user)
+    )
+
+    friends = []
+    for f in friendships:
+        friend = f.user2 if f.user1 == request.user else f.user1
+        friends.append({
+            'name': friend.full_name,
+            'avatar': friend.avatar.url if friend.avatar else None,
+            'id': friend.id,
+        }) 
+           
+    numberFriend = len(friends)
+    countPost = Posts.objects.filter(user=request.user).count()
+    totalLikes = PostLike.objects.filter(post__user=request.user).count()
+    
     context = {
         'user' : request.user,
         'posts': posts,
         'user_liked_posts':liked_posts,
+        'friends': friends,
+        'numberfriends': numberFriend,
+        'numberposts':countPost,
+        'totallikeposts':totalLikes,
     }
     
     return render(request,'home/home.html',context)
@@ -137,6 +160,7 @@ def profile_view(request, user_id =None):
         'highlight_comment_id': highlight_comment_id,
     }
     return render(request,'personal/personal.html',context)
+
 
 @login_required(login_url='login')
 def edit_profile(request):
