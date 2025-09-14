@@ -491,55 +491,43 @@ flex-shrink: 0;
   <!-- Right sidebar -->
   <aside class="right-sidebar">
     <h3 class="sidebar-title">Gợi ý kết bạn</h3>
-    
-    <div class="friend-suggestion">
-      <div class="friend-avatar">
-        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Nguyễn Văn A">
+  
+    {% for user, mutual_count in suggestfriend %}
+      <div class="friend-suggestion">
+        <a href="{% url 'personal_with_id' user.id %}" style="text-decoration:none">
+        <div class="friend-avatar" style="background:linear-gradient(45deg, #4ecdc4, #44a08d); color:white">
+          {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" alt="{{ user.full_name }}">
+        {% else %}
+          <div class="avatar-text">
+            {{ user.full_name|first|upper }}
+          </div>
+        {% endif %}
+        </div>
+      </a>
+        <div class="friend-info">
+        <a href="{% url 'personal_with_id' user.id %}" style="text-decoration:none">
+
+          <div class="friend-name">{{ user.full_name }}</div>
+        </a>
+          <div class="mutual-friends">{{ mutual_count }} bạn chung</div>
+        </div>
+        <form method="post" action="{% url 'add_friend' user.id %}">
+          {% csrf_token %}
+          <button type="submit" class="add-friend-btn">Thêm bạn</button>
+        </form>
       </div>
-      <div class="friend-info">
-        <div class="friend-name">Nguyễn Văn A</div>
-        <div class="mutual-friends">15 bạn chung</div>
-      </div>
-      <button class="add-friend-btn">Thêm bạn</button>
-    </div>
-    
-    <div class="friend-suggestion">
-      <div class="friend-avatar">
-        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Trần Thị B">
-      </div>
-      <div class="friend-info">
-        <div class="friend-name">Trần Thị B</div>
-        <div class="mutual-friends">8 bạn chung</div>
-      </div>
-      <button class="add-friend-btn">Thêm bạn</button>
-    </div>
-    
-    <div class="friend-suggestion">
-      <div class="friend-avatar">
-        <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Lê Văn C">
-      </div>
-      <div class="friend-info">
-        <div class="friend-name">Lê Văn C</div>
-        <div class="mutual-friends">5 bạn chung</div>
-      </div>
-      <button class="add-friend-btn">Thêm bạn</button>
-    </div>
-    
-    <div class="friend-suggestion">
-      <div class="friend-avatar">
-        <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Phạm Thị D">
-      </div>
-      <div class="friend-info">
-        <div class="friend-name">Phạm Thị D</div>
-        <div class="mutual-friends">12 bạn chung</div>
-      </div>
-      <button class="add-friend-btn">Thêm bạn</button>
-    </div>
-    
+    {% empty %}
+      <p>Không có gợi ý kết bạn nào.</p>
+    {% endfor %}
+  
     <div class="view-all">
-      <a href="#">Xem tất cả</a>
+      {% comment %} <a href="{% url 'all_suggestions' %}">Xem tất cả</a> {% endcomment %}
+      <a>Xem tất cả</a>
+
     </div>
   </aside>
+  
 </div>
 
 {% comment %} <div id="friendsModal" class="modal">

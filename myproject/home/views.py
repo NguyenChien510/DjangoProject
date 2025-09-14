@@ -8,6 +8,56 @@ from django.contrib.auth import logout,login as auth_login
 from django.db.models import Q,Count
 from django.contrib.auth.decorators import login_required
 
+def suggest_friends(current_user, limit=10):
+    # Lấy danh sách bạn bè của current_user
+    my_friendships = Friendship.objects.filter(
+        Q(user1=current_user) | Q(user2=current_user),
+        status="accepted"
+    )
+    my_friends = set(
+        f.user1 if f.user2 == current_user else f.user2
+        for f in my_friendships
+    )
+
+    # Lấy tất cả user khác
+    all_users = User.objects.exclude(id=current_user.id)
+
+    suggestions = []
+
+    for u in all_users:
+        # Bỏ qua nếu đã là bạn
+        if u in my_friends:
+            continue
+
+        # Kiểm tra có pending request không
+        pending = Friendship.objects.filter(
+            (Q(user1=current_user, user2=u) | Q(user1=u, user2=current_user)),
+            status="pending"
+        ).exists()
+        if pending:
+            continue
+
+        # Tính số bạn chung
+        u_friendships = Friendship.objects.filter(
+            Q(user1=u) | Q(user2=u),
+            status="accepted"
+        )
+        u_friends = set(
+            f.user1 if f.user2 == u else f.user2
+            for f in u_friendships
+        )
+
+        mutual_count = len(my_friends.intersection(u_friends))
+
+        if mutual_count > 0:
+            suggestions.append((u, mutual_count))
+
+    # Sắp xếp theo mutual_count giảm dần
+    suggestions.sort(key=lambda x: x[1], reverse=True)
+
+    # Trả về giới hạn limit
+    return suggestions[:limit]
+
 # Create your views here.
 def logout_view(request):
     if request.user.is_authenticated:
@@ -77,6 +127,7 @@ def home(request):
     numberFriend = len(friends)
     countPost = Posts.objects.filter(user=request.user).count()
     totalLikes = PostLike.objects.filter(post__user=request.user).count()
+    results = suggest_friends(request.user, limit=10)
     
     context = {
         'user' : request.user,
@@ -86,6 +137,7 @@ def home(request):
         'numberfriends': numberFriend,
         'numberposts':countPost,
         'totallikeposts':totalLikes,
+        'suggestfriend': results,
     }
     
     return render(request,'home/home.html',context)
@@ -422,3 +474,5 @@ def findfriend(request):
             "current_user": current_user,
         },
     )
+    
+

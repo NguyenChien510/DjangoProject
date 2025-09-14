@@ -126,7 +126,7 @@ body {
 
 /* Notification list specific styling */
 #notification-list {
-    max-height: 190px;
+    max-height: 204px;
     overflow-y: auto;
     overflow-x: hidden;
 }

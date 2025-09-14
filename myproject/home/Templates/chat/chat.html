@@ -1,146 +1,126 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Messenger</title>
-    <link rel="stylesheet" href="{% static 'chat/style.css' %}">
+    <link rel="stylesheet" href="{% static 'chat/style.css' %}" />
     <script>
-        const CURRENT_USER_ID = {{ request.user.id|default:"0" }};
+      const CURRENT_USER_ID = {{ request.user.id|default:"0" }};
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="chat-container">
-        <!-- Sidebar với danh sách chat -->
-        <div class="chat-sidebar" id="chatSidebar">
-            <div class="sidebar-header">
-                <h2 class="sidebar-title">
-                    <a href="{% url 'home' %}" style="text-decoration: none; color: inherit; margin-right: 8px;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                        </svg>
-                    </a>
-                    Messenger
-                </h2>
-            </div>
-            
-            <div class="search-container">
-                <input type="text" class="search-input" placeholder="Tìm kiếm trong Messenger">
-                <div class="search-results"></div>
-            </div>
-            
-            <div class="chat-list" id="chatList">
-                {% for item in conversations %}
-                    {% with conv=item.conversation other=item.other_user %}
-                    <div class="chat-item" 
-                         data-user-id="{{ other.id }}" 
-                         data-conv-id="{{ conv.id }}" 
-                         onclick="selectChat(
-                            '{{ other.id }}', 
-                            '{{ other.full_name }}' ,
-                            '{{ conv.id }}',
-                            '{% if other.avatar %}{{ other.avatar.url }}{% else %}null{% endif %}')">
-                        <div class="avatar">
-                            {% if other.avatar %}
-                                <img src="{{ other.avatar.url }}" alt="avatar">
-                            {% else %}
-                                {{ other.full_name|slice:":1"|upper }}
-                            {% endif %}
-                        </div>
-                        
-                        <div class="chat-info">
-                            <div class="chat-name">{{ other.full_name }}</div>
-                            <div class="chat-bottom">
-                            <div class="chat-preview">
-                                {% if conv.messages.last %}
-                                    {% if conv.messages.last.sender_id == request.user.id %}
-                                        <span class="sender-label">Bạn:</span>
-                                {% endif %}
-                                    {{ conv.messages.last.text|truncatechars:20 }}
-                                {% else %}
-                                    (Chưa có tin nhắn)
-                                {% endif %}
-                            </div>
-                            <div class="chat-time">
-                                {% if conv.messages.last %}
-                                    {{conv.messages.last.created_at|date:"H:i"}}
-                                {% endif %}
-                            </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endwith %}
-                {% endfor %}
-            </div>
-            
-            
-            
+      <!-- Sidebar -->
+      <div class="chat-sidebar" id="chatSidebar">
+        <div class="sidebar-header">
+          <h2 class="sidebar-title">
+            <a
+              href="{% url 'home' %}"
+              style="text-decoration: none; color: inherit; margin-right: 8px"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+              </svg>
+            </a>
+            Messenger
+          </h2>
         </div>
-        
-        <!-- Khu vực chat chính -->
-        <div class="chat-main mobile-show" id="chatMain">
-            <div class="chat-header">
-                <div class="chat-header-info">
-                    <div class="header-avatar" id="headerAvatar"></div>
-                    <div>
-                        <div class="header-name" id="headerName"></div>
-                        <div class="header-status"></div>
-                    </div>
-                </div>
-                <div class="chat-actions">
-                    <button class="action-btn">ℹ️</button>
-                </div>
-            </div>
-            
-            <div class="messages-container" id="messagesContainer">
-                {% comment %} <div class="message received">
-                    <div class="message-avatar">N</div>
-                    <div class="message-content">Chào bạn! Bạn có khỏe không?</div>
-                </div>
-                <div class="message-time" style="text-align: left; margin-left: 44px;">14:30</div>
-                
-                <div class="message sent">
-                    <div class="message-content">Chào bạn! Mình khỏe, cảm ơn bạn đã hỏi thăm</div>
-                </div>
-                <div class="message-time" style="text-align: right; margin-right: 12px;">14:32</div>
-                
-                <div class="message received">
-                    <div class="message-avatar">N</div>
-                    <div class="message-content">Tuyệt quá! Mình có một tin tức thú vị muốn chia sẻ với bạn</div>
-                </div>
-                <div class="message-time" style="text-align: left; margin-left: 44px;">14:35</div>
-                
-                <div class="message sent">
-                    <div class="message-content">Tin gì thế? Kể mình nghe đi!</div>
-                </div>
-                <div class="message-time" style="text-align: right; margin-right: 12px;">14:36</div>
-                
-                <div class="message received">
-                    <div class="message-avatar">N</div>
-                    <div class="message-content">Mình vừa được nhận vào công ty mới! 🎉</div>
-                </div>
-                <div class="message-time" style="text-align: left; margin-left: 44px;">14:38</div>
-                
-                <div class="message sent">
-                    <div class="message-content">Chúc mừng bạn! Đó là tin tuyệt vời đấy!</div>
-                </div>
-                <div class="message-time" style="text-align: right; margin-right: 12px;">14:39</div>
-                
-                <div class="message sent">
-                    <div class="message-content">Cảm ơn bạn nhiều!</div>
-                </div>
-                <div class="message-time" style="text-align: right; margin-right: 12px;">14:40</div> {% endcomment %}
-            </div>
-            
-            <div class="input-container">
-                <div class="input-wrapper">
-                    <textarea class="message-input" placeholder="Aa" rows="1" id="messageInput"></textarea>
-                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
-                </div>
-            </div>
+
+        <div class="search-container">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Tìm kiếm trong Messenger"
+          />
+          <div class="search-results"></div>
         </div>
+
+        <div class="chat-list" id="chatList">
+          {% for item in conversations %}
+            {% with conv=item.conversation other=item.other_user %}
+              <div
+                class="chat-item"
+                data-user-id="{{ other.id }}"
+                data-conv-id="{{ conv.id }}"
+                onclick="selectChat(
+                  '{{ other.id }}',
+                  '{{ other.full_name }}',
+                  '{{ conv.id }}',
+                  '{% if other.avatar %}{{ other.avatar.url }}{% else %}null{% endif %}'
+                )"
+              >
+                <div class="avatar">
+                  {% if other.avatar %}
+                    <img src="{{ other.avatar.url }}" alt="avatar" />
+                  {% else %}
+                    {{ other.full_name|slice:":1"|upper }}
+                  {% endif %}
+                </div>
+
+                <div class="chat-info">
+                  <div class="chat-name">{{ other.full_name }}</div>
+                  <div class="chat-bottom">
+                    <div class="chat-preview">
+                      {% if conv.messages.last %}
+                        {% if conv.messages.last.sender_id == request.user.id %}
+                          <span class="sender-label">Bạn:</span>
+                        {% endif %}
+                        {{ conv.messages.last.text|truncatechars:20 }}
+                      {% else %}
+                        (Chưa có tin nhắn)
+                      {% endif %}
+                    </div>
+                    <div class="chat-time">
+                      {% if conv.messages.last %}
+                        {{ conv.messages.last.created_at|date:"H:i" }}
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endwith %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Chat main -->
+      <div class="chat-main mobile-show" id="chatMain">
+        <div class="chat-header">
+          <div class="chat-header-info">
+            <div class="header-avatar" id="headerAvatar"></div>
+            <div>
+              <div class="header-name" id="headerName"></div>
+              <div class="header-status"></div>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <button class="action-btn">ℹ️</button>
+          </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer"></div>
+
+        <div class="input-container">
+          <div class="input-wrapper">
+            <textarea
+              class="message-input"
+              placeholder="Aa"
+              rows="1"
+              id="messageInput"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+          </div>
+        </div>
+      </div>
     </div>
+
     <script src="{% static 'chat/script.js' %}"></script>
-</body>
+  </body>
 </html>

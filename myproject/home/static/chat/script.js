@@ -19,6 +19,8 @@ function selectChat(otherId, otherName, convId, otherAvatarUrl = null) {
     currentOtherUserId = otherId;
     currentConversationId = parseInt(convId, 10);
 
+    
+
     // header
     document.getElementById("headerName").textContent = otherName;
     document.querySelector(".header-status").textContent = "Đang tải...";
@@ -31,7 +33,7 @@ function selectChat(otherId, otherName, convId, otherAvatarUrl = null) {
     // load trạng thái
     fetchStatus(otherId);
     if (window.statusInterval) clearInterval(window.statusInterval);
-    window.statusInterval = setInterval(() => fetchStatus(otherId), 15000);
+    window.statusInterval = setInterval(() => fetchStatus(otherId), 2000);
 
     // load tin nhắn
     fetch(`/chat/messages/${currentConversationId}/`)
