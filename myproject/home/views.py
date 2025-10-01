@@ -476,3 +476,17 @@ def findfriend(request):
     )
     
 
+@login_required
+def delete_conversation(request, conversation_id):
+    """
+    Xóa 1 conversation và toàn bộ messages liên quan.
+    Chỉ user trong cuộc trò chuyện mới có quyền xoá.
+    """
+    conversation = get_object_or_404(Conversation, id=conversation_id)
+
+    # Chỉ cho phép user1 hoặc user2 được xóa
+    if request.user != conversation.user1 and request.user != conversation.user2:
+        return JsonResponse({"success": False, "error": "Bạn không có quyền xoá cuộc trò chuyện này."}, status=403)
+
+    conversation.delete()  # Nhờ on_delete=CASCADE → xoá hết message liên quan
+    return JsonResponse({"success": True, "message": "Đã xoá cuộc trò chuyện."})

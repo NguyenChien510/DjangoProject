@@ -285,3 +285,47 @@ function updateChatListPreview(convId, lastText, time, senderId) {
     // Đưa hội thoại lên đầu danh sách
     chatList.prepend(chatItem);
 }
+
+function confirmDeleteConversation() {
+    if (!currentConversationId) {
+      alert("Chưa chọn cuộc trò chuyện nào!");
+      return;
+    }
+  
+    if (confirm("Bạn có chắc muốn xóa cuộc trò chuyện này?")) {
+      fetch(`/delete-conversation/${currentConversationId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCSRFToken(), // cần CSRF token nếu Django view yêu cầu
+        },
+      })
+        .then((res) => {
+          if (res.ok) {
+            alert("Đã xóa cuộc trò chuyện.");
+            // reload lại trang hoặc xóa item trong chat list
+            location.reload();
+          } else {
+            alert("Lỗi khi xóa cuộc trò chuyện.");
+          }
+        })
+        .catch(() => {
+          alert("Không thể kết nối tới server.");
+        });
+    }
+  }
+
+  function getCSRFToken() {
+    const name = "csrftoken=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(";");
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === " ") {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) === 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }

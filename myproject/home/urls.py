@@ -30,6 +30,7 @@ urlpatterns = [
     path("chat/status/<int:user_id>/", viewrealtime.get_status, name="get_status"),
     path("chat/search-users/", viewrealtime.search_users, name="search_users"),
     path("chat/get-or-create-conversation/<int:user_id>/", viewrealtime.get_or_create_conversation, name="get_or_create_conversation"),
+    path("delete-conversation/<int:conversation_id>/", views.delete_conversation, name="delete_conversation"),
 ]
 
 if settings.DEBUG:
