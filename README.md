@@ -43,6 +43,9 @@ The focus is on **user interaction, real-time communication**.
 <small>Direct messaging interface for private conversations between users</small><br/>
 <img src="./myproject/readmeIMG/b56a1296-383c-4d17-b97a-8098fed49e69.jpg" alt="Messaging" width="100%"/>
 
+### REALTIME CHATTING
+![Demo](./myproject/readmeIMG/demo.gif)
+
 ### 👥 Suggest Friends
 <small>A list of suggested friends based on mutual connections and interests.</small><br/>
 <img src="./myproject/readmeIMG/635771af-f76e-46bf-b2e6-e377dc7fbea0.jpg" alt="Suggest Friends" width="700"/>
