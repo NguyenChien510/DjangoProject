@@ -29,7 +29,9 @@ ul.messages li.success {
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    /* background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); */
+    background: #c4c4c4;
+
     min-height: 100vh;
     display: flex;
     align-items: center;
