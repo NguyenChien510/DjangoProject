@@ -55,6 +55,7 @@ The focus is on **user interaction, real-time communication**.
 <small>Shows notifications such as likes, comments, and friend requests in realtime</small><br/>
 <img src="./myproject/readmeIMG/7041cdaa-b4a7-4599-9d59-73558631bfb8.jpg" alt="Notifications" width="700"/>
 
+![Demo](./myproject/readmeIMG/demo.gif)
 
 ---
 
