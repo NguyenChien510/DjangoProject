@@ -43,7 +43,7 @@ The focus is on **user interaction, real-time communication**.
 <small>Direct messaging interface for private conversations between users</small><br/>
 <img src="./myproject/readmeIMG/b56a1296-383c-4d17-b97a-8098fed49e69.jpg" alt="Messaging" width="100%"/>
 
-### REALTIME CHATTING
+### VIDEO REALTIME CHATTING (click to play)
 ![Demo](./myproject/readmeIMG/demo.gif)
 
 ### 👥 Suggest Friends
