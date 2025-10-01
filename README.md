@@ -35,23 +35,25 @@ The focus is on **user interaction, real-time communication**.
 
 ## 🖼️ UI/UX Screenshots  
 
-### 🏠 Home Feed  
-![Home Feed](./myproject/readmeIMG/23ea7786-311e-4cf0-8d81-af99f5bf01fb.jfif)  
+### 🏠 Home Feed
+<small>The main feed displaying posts from friends and followed users.</small><br/>
+<img src="./myproject/readmeIMG/23ea7786-311e-4cf0-8d81-af99f5bf01fb.jfif" alt="Home Feed" width="100%"/>
 
-### 👤 Post  
-![Profile](./myproject/readmeIMG/1997c5b6-37f7-46ca-aba0-42a2b122d1fb.jpg)  
+### 💌 Messaging System
+<small>Direct messaging interface for private conversations between users</small><br/>
+<img src="./myproject/readmeIMG/b56a1296-383c-4d17-b97a-8098fed49e69.jpg" alt="Messaging" width="100%"/>
 
-### 👥 Suggest Friends  
-![Suggest Friends](./myproject/readmeIMG/635771af-f76e-46bf-b2e6-e377dc7fbea0.jpg)  
+### 👥 Suggest Friends
+<small>A list of suggested friends based on mutual connections and interests.</small><br/>
+<img src="./myproject/readmeIMG/635771af-f76e-46bf-b2e6-e377dc7fbea0.jpg" alt="Suggest Friends" width="700"/>
 
-### 💬 Post Detail with Comments  
-![Post Detail](./myproject/readmeIMG/2941b348-daee-4e48-88d6-43d7e268f724.jpg)  
+### 💬 Post Detail with Comments
+<small>Detailed view of a post including comments, likes, and user interactions.</small><br/>
+<img src="./myproject/readmeIMG/2941b348-daee-4e48-88d6-43d7e268f724.jpg" alt="Post Detail" width="700"/>
 
-### 🔔 Notifications  
-![Notifications](./myproject/readmeIMG/7041cdaa-b4a7-4599-9d59-73558631bfb8.jpg)  
-
-### 💌 Messaging System  
-![Messaging](./myproject/readmeIMG/b56a1296-383c-4d17-b97a-8098fed49e69.jpg)  
+### 🔔 Notifications
+<small>Shows notifications such as likes, comments, and friend requests in realtime</small><br/>
+<img src="./myproject/readmeIMG/7041cdaa-b4a7-4599-9d59-73558631bfb8.jpg" alt="Notifications" width="700"/>
 
 
 ---
