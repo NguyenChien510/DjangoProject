@@ -50,16 +50,6 @@ The focus is on **user interaction, real-time communication**.
 <small>A list of suggested friends based on mutual connections and interests.</small><br/>
 <img src="./myproject/readmeIMG/635771af-f76e-46bf-b2e6-e377dc7fbea0.jpg" alt="Suggest Friends" width="700"/>
 
-### 💬 Post Detail with Comments
-<small>Detailed view of a post including comments, likes, and user interactions.</small><br/>
-<img src="./myproject/readmeIMG/2941b348-daee-4e48-88d6-43d7e268f724.jpg" alt="Post Detail" width="700"/>
-
-### 🔔 Notifications
-<small>Shows notifications such as likes, comments, and friend requests in realtime</small><br/>
-<img src="./myproject/readmeIMG/7041cdaa-b4a7-4599-9d59-73558631bfb8.jpg" alt="Notifications" width="700"/>
-
-![Demo](./myproject/readmeIMG/demo.gif)
-
 ---
 
 ## 🚀 Technologies Used  
