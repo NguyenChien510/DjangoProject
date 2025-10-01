@@ -36,22 +36,22 @@ The focus is on **user interaction, real-time communication**.
 ## 🖼️ UI/UX Screenshots  
 
 ### 🏠 Home Feed  
-![Home Feed](./readmeIMG/23ea7786-311e-4cf0-8d81-af99f5bf01fb.jfif)  
+![Home Feed](./myproject/readmeIMG/23ea7786-311e-4cf0-8d81-af99f5bf01fb.jfif)  
 
 ### 👤 Post  
-![Profile](./readmeIMG/1997c5b6-37f7-46ca-aba0-42a2b122d1fb.jpg)  
+![Profile](./myproject/readmeIMG/1997c5b6-37f7-46ca-aba0-42a2b122d1fb.jpg)  
 
 ### 👥 Suggest Friends  
-![Suggest Friends](./readmeIMG/635771af-f76e-46bf-b2e6-e377dc7fbea0.jpg)  
+![Suggest Friends](./myproject/readmeIMG/635771af-f76e-46bf-b2e6-e377dc7fbea0.jpg)  
 
 ### 💬 Post Detail with Comments  
-![Post Detail](./readmeIMG/2941b348-daee-4e48-88d6-43d7e268f724.jpg)  
+![Post Detail](./myproject/readmeIMG/2941b348-daee-4e48-88d6-43d7e268f724.jpg)  
 
 ### 🔔 Notifications  
-![Notifications](./readmeIMG/7041cdaa-b4a7-4599-9d59-73558631bfb8.jpg)  
+![Notifications](./myproject/readmeIMG/7041cdaa-b4a7-4599-9d59-73558631bfb8.jpg)  
 
 ### 💌 Messaging System  
-![Messaging](./readmeIMG/b56a1296-383c-4d17-b97a-8098fed49e69.jpg)  
+![Messaging](./myproject/readmeIMG/b56a1296-383c-4d17-b97a-8098fed49e69.jpg)  
 
 
 ---
